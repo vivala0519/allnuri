@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ONNURI_MALLS } from './data/malls';
 import { AdapterSearchResponse, UnifiedProduct } from './types/onnuri';
 import { executeUnifiedSearch } from './services/productAdapter';

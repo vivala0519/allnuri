@@ -98,13 +98,13 @@ export const UnifiedProductComparisonSection: React.FC<
         setJsonError('유효한 JSON 배열 또는 { "items": [...] } 형식이 아닙니다.');
         return;
       }
-      const validItems = rawArray
+      const validItems = (rawArray as unknown[])
         .map((item: unknown) =>
           typeof item === 'object' && item !== null
             ? normalizeRawProduct(item as Record<string, unknown>)
             : null
         )
-        .filter((item): item is UnifiedProduct => item !== null);
+        .filter((item: UnifiedProduct | null): item is UnifiedProduct => item !== null);
 
       if (validItems.length === 0) {
         setJsonError(
