@@ -1,4 +1,5 @@
-import { JSDOM } from 'jsdom';
+import { JSDOM, VirtualConsole } from 'jsdom';
+import { matchesSearchQuery } from '../../src/utils/searchMatch.mjs';
 
 const MALLS = [
   { mallId: 'onnuri-market-official', name: '온누리시장', origin: 'https://www.onnuri-mall.co.kr', kind: 'market' },
@@ -11,19 +12,41 @@ const MALLS = [
   { mallId: 'gongyoung-onnuri', name: '공영홈쇼핑 온누리장터', origin: 'https://www.gongyoungshop.kr', kind: 'gongyoung' },
   { mallId: 'gyeongbuk-cyso', name: '경북고향장터 사이소', origin: 'https://www.cyso.co.kr', kind: 'cyso' },
   { mallId: 'onnuri-paldo-sijang', name: '온누리팔도시장', origin: 'https://www.e-jangter.com', kind: 'paldo' },
+  { mallId: 'onnuri-shopping', name: '온누리쇼핑', origin: 'https://onnurishop.co.kr', kind: 'onnuri-shopping' },
+  { mallId: 'onnuri-5iljang', name: '온누리5일장', origin: 'https://www.onnuri5.co.kr', kind: 'five-day' },
+  { mallId: 'onnuri-juntong-sijang', name: '온누리전통시장', origin: 'https://www.onnuri-sijang.com', kind: 'traditional' },
+  { mallId: 'onnuri-market-nuri', name: '온누리마켓', origin: 'https://nurimarket.co.kr', kind: 'nuri' },
+  { mallId: 'onnuri-gonggong-mall', name: '온누리공공몰', origin: 'https://www.ongong.kr', kind: 'gonggong' },
+  { mallId: 'genius-mall', name: '지니어스 Mall', origin: 'https://luxurysystem.co.kr', kind: 'genius' },
+  { mallId: 'epost-shopping-onnuri', name: '우체국쇼핑', origin: 'https://mall.epost.go.kr', kind: 'epost' },
+  { mallId: 'hyundai-hmall-onnuri', name: '현대홈쇼핑 온누리샵', origin: 'https://www.hmall.com', kind: 'hmall' },
+  { mallId: '11st-onnuri', name: '11번가 온누리마켓', origin: 'https://www.11st.co.kr', kind: 'elevenst' },
+  { mallId: 'lotteon-onnuri', name: '롯데ON 온누리상생스토어', origin: 'https://www.lotteon.com', kind: 'lotte' },
 ];
 const cache = new Map();
 const CACHE_MS = 5 * 60 * 1000;
 let cysoFeedCache;
+let lotteFeedCache;
 
-export function parsePublicResults(html, mall, now = new Date().toISOString()) {
+export function parsePublicResults(html, mall, now = new Date().toISOString(), query) {
   if (mall.kind === 'hotdeal') return parseHotdealResults(html, mall, now);
   const document = new JSDOM(html).window.document;
   if (mall.kind === 'paldo') return parsePaldoResults(document, mall, now);
   if (mall.kind === 'kkuk-ai') return parseKkukAiResults(document, mall, now);
   if (mall.kind === 'market') return parseMarketResults(document, mall, now);
+  if (mall.kind === 'onnuri-shopping') return parseOnnuriShoppingResults(document, mall, now);
+  if (mall.kind === 'nuri') return parseNuriResults(document, mall, now);
+  if (mall.kind === 'gonggong') return parseGonggongResults(document, mall, now);
+  if (mall.kind === 'genius') return parseGeniusResults(document, mall, now);
+  if (mall.kind === 'epost') return parseEpostResults(document, mall, now);
+  const form = document.querySelector('.search_form form.form_box');
+  const resultArea = document.querySelector('.result_item #total_cnt');
+  const emptyResult = document.querySelector('.c_section.c_comb .c_none .gtxt')?.textContent.includes('검색된 결과가 없습니다');
+  if (!form || form.querySelector('input[name="pn"]')?.value !== 'product.search.list' ||
+      (query !== undefined && form.querySelector('input[name="search_word"]')?.value !== query) ||
+      (!resultArea && !emptyResult)) throw new Error('상품 검색 결과를 찾지 못했습니다');
   const items = [];
-  for (const card of document.querySelectorAll('.item_box[data-pcode]')) {
+  for (const card of resultArea?.querySelectorAll('.item_box[data-pcode]') || []) {
     if (card.classList.contains('if_soldout') || card.querySelector('.soldout')) continue;
     const badges = [...card.querySelectorAll('.product-badge-list span, .item_icon span')];
     if (!badges.some((badge) => badge.textContent.replace(/\s/g, '') === '디지털온누리')) continue;
@@ -46,6 +69,269 @@ export function parsePublicResults(html, mall, now = new Date().toISOString()) {
     });
   }
   return items;
+}
+
+function safeImage(value, origin) {
+  try { const url = new URL(value, origin); return value && url.protocol === 'https:' ? url.toString() : ''; } catch { return ''; }
+}
+
+export function parseElevenstResults(body, mall, now = new Date().toISOString()) {
+  if (!Array.isArray(body?.data) || !Number.isFinite(body.totalCount)) throw new Error('11번가 검색 결과 형식이 다릅니다');
+  const seen = new Set();
+  return body.data.filter((group) => group?.groupName === 'list' && Array.isArray(group.items))
+    .flatMap((group) => group.items).flatMap((product) => {
+      const id = String(product?.id || '');
+      const title = String(product?.title || '').trim();
+      const price = Number(product?.finalPrc);
+      const hasOnnuri = Array.isArray(product?.benefitText) && product.benefitText.some((benefit) => benefit?.type === 'onnuri');
+      if (!hasOnnuri || product.soldOut === true || product.isSoldOut === true ||
+          (product.soldOut !== false && product.isSoldOut !== false) || !/^\d+$/.test(id) || !title ||
+          !Number.isFinite(price) || price <= 0 || seen.has(id)) return [];
+      seen.add(id);
+      return [{ id: `${mall.mallId}:${id}`, mallId: mall.mallId, mallName: mall.name, title, price,
+        shippingFee: product.deliveryDescription === '무료' ? 0 : null,
+        productUrl: `${mall.origin}/products/${id}`, imageUrl: safeImage(product.imageUrl, mall.origin),
+        updatedAt: now, dataSourceLabel: '온누리 검색 필터 · 상품별 온누리 표시' }];
+    }).slice(0, 40);
+}
+
+export function parseLotteResults(body, mall, query, now = new Date().toISOString()) {
+  const data = body?.data;
+  if (body?.returnCode !== '200' || String(data?.dshopNo) !== '57821' ||
+      data.dshopNm !== '온누리상생스토어' || !Array.isArray(data.dpShopMdulList)) throw new Error('온누리상생스토어 데이터가 없습니다');
+  const tokens = query.toLocaleLowerCase('ko').trim().split(/\s+/).filter(Boolean);
+  const seen = new Set();
+  return data.dpShopMdulList.flatMap((module) => Array.isArray(module?.dpLnkDpTgtSetList) ? module.dpLnkDpTgtSetList : [])
+    .filter((group) => group?.dpYn === 'Y')
+    .flatMap((group) => Array.isArray(group.dtgtJsn) ? group.dtgtJsn : [])
+    .flatMap((target) => Array.isArray(target?.pdList?.dataList) ? target.pdList.dataList : [])
+    .flatMap((product) => {
+      const id = String(product?.spdNo || '');
+      const title = String(product?.spdNm || '').trim();
+      const price = Number(product?.frstFvrPrc);
+      if (product?.onnuriYn !== 'Y' || product.slStatCd !== 'SALE' || !/^LO\d+$/.test(id) || !title ||
+          !tokens.every((token) => title.toLocaleLowerCase('ko').includes(token)) ||
+          !Number.isFinite(price) || price <= 0 || seen.has(id)) return [];
+      seen.add(id);
+      const freeShipping = Array.isArray(product.flagInfoList) && product.flagInfoList.some((flag) => flag?.flagName === '무료배송');
+      return [{ id: `${mall.mallId}:${id}`, mallId: mall.mallId, mallName: mall.name, title, price,
+        shippingFee: freeShipping ? 0 : null, productUrl: `${mall.origin}/p/product/${id}`,
+        imageUrl: safeImage(product.imgFullUrl, mall.origin), updatedAt: now,
+        dataSourceLabel: '온누리상생스토어 · 상품별 온누리 표시' }];
+    }).slice(0, 40);
+}
+
+async function searchElevenstResults(mall, query, fetchImpl) {
+  const url = new URL('https://alp-apis.11st.co.kr/search/api/tab');
+  for (const [key, value] of Object.entries({ poc: 'pc', tabId: 'TOTAL_SEARCH', searchKeyword: query, pageNo: '1', filters: 'ONNURI' })) url.searchParams.set(key, value);
+  const response = await fetchImpl(url, { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(8000) });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return parseElevenstResults(await response.json(), mall);
+}
+
+async function searchLotteResults(mall, query, fetchImpl) {
+  if (!lotteFeedCache || Date.now() - lotteFeedCache.at >= CACHE_MS) {
+    const response = await fetchImpl('https://pbf.lotteon.com/display/v2/dpShop/seltMainShop?dshopNo=57821&mdiaCd=PC', {
+      headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(8000),
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const body = await response.json();
+    parseLotteResults(body, mall, query);
+    lotteFeedCache = { at: Date.now(), body };
+  }
+  return parseLotteResults(lotteFeedCache.body, mall, query);
+}
+
+function parseGonggongResults(document, mall, now) {
+  if (!document.querySelector('#frmdetailsearch') || !document.title.includes('상품검색')) throw new Error('상품 검색 결과를 찾지 못했습니다');
+  return [...document.querySelectorAll('.nl-items > a.nl-item')].flatMap((card) => {
+    let url;
+    try { url = new URL(card.getAttribute('href'), `${mall.origin}/shop/`); } catch { return []; }
+    const id = url.searchParams.get('it_id');
+    const title = card.querySelector('.nl-name b')?.textContent.trim();
+    const priceNode = card.querySelector('.nl-price .discount') || card.querySelector('.nl-price .unit');
+    const price = Number((priceNode?.textContent || '').replace(/[^\d]/g, ''));
+    if (url.origin !== mall.origin || url.pathname !== '/shop/item.php' || !/^\d+$/.test(id || '') || !title || !Number.isFinite(price) || price <= 0 || /품절|판매종료/.test(card.textContent)) return [];
+    return [{ id: `${mall.mallId}:${id}`, mallId: mall.mallId, mallName: mall.name, title, price,
+      shippingFee: card.querySelector('.free-ship')?.textContent.includes('무료배송') ? 0 : null,
+      productUrl: url.toString(), imageUrl: safeImage(card.querySelector('.nl-item-pic img')?.getAttribute('src'), mall.origin),
+      updatedAt: now, eligibility: 'unknown', dataSourceLabel: '공개 검색 · 상품별 결제 여부 미확인' }];
+  });
+}
+
+function parseGeniusResults(document, mall, now) {
+  if (!document.querySelector('form.search_bbs')) throw new Error('상품 검색 결과를 찾지 못했습니다');
+  return [...document.querySelectorAll('.area_shopList ul[data-shop-list="default"] > li > a[href]')].flatMap((card) => {
+    let url;
+    try { url = new URL(card.getAttribute('href'), mall.origin); } catch { return []; }
+    const id = url.searchParams.get('id');
+    const title = card.querySelector(':scope > em')?.textContent.trim();
+    const price = Number((card.querySelector('.price i:last-child')?.textContent || '').replace(/[^\d]/g, ''));
+    if (url.origin !== mall.origin || url.pathname !== '/product/product.html' || url.searchParams.get('mode') !== 'view' || !/^\d+$/.test(id || '') || !title || !Number.isFinite(price) || price <= 0 || /품절|판매종료/.test(card.textContent)) return [];
+    return [{ id: `${mall.mallId}:${id}`, mallId: mall.mallId, mallName: mall.name, title, price,
+      shippingFee: null, productUrl: url.toString(), imageUrl: safeImage(card.querySelector('.img img')?.getAttribute('src'), mall.origin),
+      updatedAt: now, eligibility: 'unknown', dataSourceLabel: '공개 검색 · 상품별 결제 여부 미확인' }];
+  });
+}
+
+function parseEpostResults(document, mall, now) {
+  if (!document.querySelector('form#frm input[name="srchGoodsNm"]') ||
+      (!document.querySelector('.list_box_v4') && !document.body.textContent.includes('판매중인 상품이 없습니다.'))) throw new Error('전통시장 검색 결과를 찾지 못했습니다');
+  return [...document.querySelectorAll('.list_box_v4 .list_box > ul > li')].flatMap((card) => {
+    const link = card.querySelector('a[href*="fn_goodsDetailView"]');
+    const args = link?.getAttribute('href')?.match(/fn_goodsDetailView\('([A-Za-z0-9]+)','(05)','([A-Za-z0-9]*)','([A-Za-z0-9]*)','(\d+)'\)/);
+    const title = card.querySelector('.goods_text .tit')?.textContent.trim();
+    const price = Number((card.querySelector('.goods_text .price > p:not(.dc) em')?.textContent || '').replace(/[^\d]/g, ''));
+    if (!args || !title || !Number.isFinite(price) || price <= 0 || /품절|판매종료/.test(card.textContent)) return [];
+    const url = new URL('/fo/goods/goodsDetailView.do', mall.origin);
+    for (const [key, value] of Object.entries({ goodsCd: args[1], pavlnDivCd: args[2], goodsDispTypeCd: args[3], goodsDispTypeDtlCd: args[4], ctgryCd: args[5] })) url.searchParams.set(key, value);
+    return [{ id: `${mall.mallId}:${args[1]}`, mallId: mall.mallId, mallName: mall.name, title, price,
+      shippingFee: card.querySelector('.goods_tip')?.textContent.includes('무료배송') ? 0 : null,
+      productUrl: url.toString(), imageUrl: safeImage(card.querySelector('.goods_img img')?.getAttribute('src'), mall.origin),
+      updatedAt: now, eligibility: 'unknown', dataSourceLabel: '전통시장관 검색 · 상품별 결제 여부 미확인' }];
+  });
+}
+
+export function parseHmallResults(html, mall, query, now = new Date().toISOString()) {
+  const document = new JSDOM(html, { virtualConsole: new VirtualConsole() }).window.document;
+  let body;
+  try { body = JSON.parse(document.querySelector('#__NEXT_DATA__')?.textContent || ''); } catch { throw new Error('온누리샵 데이터가 없습니다'); }
+  const page = body?.props?.pageProps;
+  const products = page?.res?.searchResult?.hmallItemSearchResultList;
+  if (page?.param?.onnuriGcStlmYn !== 'Y' || page.param.searchTerm !== query || !Array.isArray(products)) throw new Error('온누리 검색 필터가 적용되지 않았습니다');
+  const seen = new Set();
+  return products.flatMap((product) => {
+    const id = String(product?.slitmCd || '');
+    const title = String(product?.slitmNm || '').trim();
+    const price = Number(product?.sellPrc);
+    if (product?.onnuriGcStlmYn !== 'Y' || product.soldout === true || product.ostkYn !== 'N' || !/^\d+$/.test(id) || !title || !Number.isFinite(price) || price <= 0 || seen.has(id)) return [];
+    seen.add(id);
+    const imageName = String(product.orglImgNm || '');
+    const imageUrl = id.length >= 8 && /^[\w.-]+$/.test(imageName)
+      ? `https://image.hmall.com/static/${id.slice(7, 8)}/${id.slice(6, 7)}/${id.slice(4, 6)}/${id.slice(2, 4)}/${imageName}` : '';
+    return [{ id: `${mall.mallId}:${id}`, mallId: mall.mallId, mallName: mall.name, title, price, shippingFee: null,
+      productUrl: `${mall.origin}/md/pda/itemPtc?slitmCd=${id}`, imageUrl, updatedAt: now,
+      dataSourceLabel: '온누리 검색 필터 · 디지털온누리 결제 필드' }];
+  }).slice(0, 40);
+}
+
+async function searchHmallResults(mall, query, fetchImpl) {
+  const url = new URL('/md/pde/search', mall.origin);
+  url.searchParams.set('searchTerm', query);
+  url.searchParams.set('onnuriGcStlmYn', 'Y');
+  const response = await fetchImpl(url, { headers: { Accept: 'text/html' }, signal: AbortSignal.timeout(8000) });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return parseHmallResults(await response.text(), mall, query);
+}
+
+function parseNuriResults(document, mall, now) {
+  if (!document.querySelector('form[name="frmsearch1"]') || !document.title.includes('상품검색')) {
+    throw new Error('상품 검색 결과를 찾지 못했습니다');
+  }
+  return [...document.querySelectorAll('.main_list .swiper-slide')].flatMap((card) => {
+    const link = card.querySelector('.main_list_tit a[href]');
+    if (!link || /품절|판매종료/.test(card.textContent)) return [];
+    let url;
+    try { url = new URL(link.getAttribute('href'), mall.origin); } catch { return []; }
+    const id = url.searchParams.get('it_id');
+    const title = link.textContent.trim();
+    const priceText = card.querySelector('.main_list_price_li2')?.textContent || '';
+    const price = Number(priceText.replace(/[^\d]/g, ''));
+    if (url.origin !== mall.origin || url.pathname !== '/shop/item.php' || !/^\d+$/.test(id || '') || !title || !Number.isFinite(price) || price <= 0) return [];
+    const image = card.querySelector('.main_list_img img[alt][src]')?.getAttribute('src') || '';
+    let imageUrl = '';
+    try { const parsed = new URL(image, mall.origin); if (image && parsed.protocol === 'https:') imageUrl = parsed.toString(); } catch { /* Ignore invalid images. */ }
+    return [{ id: `${mall.mallId}:${id}`, mallId: mall.mallId, mallName: mall.name, title, price,
+      shippingFee: card.querySelector('.main_list_ico')?.textContent.includes('무료배송') ? 0 : null,
+      productUrl: url.toString(), imageUrl, updatedAt: now, eligibility: 'unknown',
+      dataSourceLabel: '공개 검색 · 상품별 결제 여부 미확인' }];
+  });
+}
+
+export function parseTraditionalResults(body, mall, now = new Date().toISOString()) {
+  const result = body?.[1];
+  if (!Array.isArray(body) || !Array.isArray(result?.resultDocuments) || result.errorCode !== 0) {
+    throw new Error('검색 결과 형식이 다릅니다');
+  }
+  return result.resultDocuments.flatMap((product) => {
+    const id = String(product?.GDS_CD || '');
+    const category = String(product?.SCAT_CD || '');
+    const title = String(product?.GDS_NM || '').trim();
+    const price = Number(product?.REAL_SELL_PRC_B2C);
+    if (!/^\d+$/.test(id) || !/^\d+$/.test(category) || !title || !Number.isFinite(price) || price <= 0) return [];
+    const path = String(product.IMG_PATH || '');
+    return [{ id: `${mall.mallId}:${id}`, mallId: mall.mallId, mallName: mall.name, title, price,
+      shippingFee: product.CNDL_NCHG_DLV_YN === 'Y' ? 0 : null,
+      productUrl: `${mall.origin}/onnuri/goods/detail?goodsCd=${id}&ctgCd=${category}`,
+      imageUrl: /^\/upload\/goods\/images\/[\w/.-]+$/i.test(path) ? `https://contents-prd.ezwelfare.net/ezwel-image/welfare_market${path}` : '',
+      updatedAt: now, eligibility: 'unknown', dataSourceLabel: '공개 검색 · 상품별 결제 여부 미확인' }];
+  });
+}
+
+async function searchTraditionalResults(mall, query, fetchImpl) {
+  const url = new URL('/onnuri/main/searchList', mall.origin);
+  const params = { searchTerm: encodeURIComponent(query), displaySize: '20', currentPage: '1',
+    clientCd: 'onnuri_b2c', dvcCd: 'PCWB', svcType: '1001', sort: 'best',
+    cndlNchgDlvYn: '', minPrice: '', maxPrice: '', brndCd: '', lcatCd: '', mcatCd: '', scatCd: '', b2cYn: 'Y' };
+  for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
+  const response = await fetchImpl(url, { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(8000) });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return parseTraditionalResults(await response.json(), mall);
+}
+
+function parseOnnuriShoppingResults(document, mall, now) {
+  return [...document.querySelectorAll('a[href="#goods"][prdtno]')].flatMap((card) => {
+    if (!card.querySelector('.onnuri-on') || /품절|판매종료/.test(card.textContent)) return [];
+    const id = card.getAttribute('prdtno');
+    const title = card.querySelector('.txt .name')?.textContent.trim();
+    const price = Number((card.querySelector('.price strong')?.textContent || '').replace(/,/g, '').trim());
+    if (!/^\d+$/.test(id || '') || !title || !Number.isFinite(price) || price <= 0) return [];
+    const image = card.querySelector('.img img[src]')?.getAttribute('src') || '';
+    let imageUrl = '';
+    try {
+      if (image) {
+        const parsed = new URL(image, mall.origin);
+        if (parsed.protocol === 'https:') imageUrl = parsed.toString();
+      }
+    } catch { /* Malformed image paths do not invalidate a product. */ }
+    return [{
+      id: `${mall.mallId}:${id}`, mallId: mall.mallId, mallName: mall.name,
+      title, price, shippingFee: null, productUrl: `${mall.origin}/shop/goods/${id}`,
+      imageUrl, updatedAt: now,
+      dataSourceLabel: '공개 검색 페이지 · 온누리 표시',
+    }];
+  });
+}
+
+export function parseFiveDayResults(body, mall, now = new Date().toISOString()) {
+  if (!Array.isArray(body?.data)) throw new Error('검색 결과 형식이 다릅니다');
+  return body.data.flatMap((product) => {
+    if (product?.prd_type !== 'onnuri' || ![2, 5].includes(Number(product.stat)) || product.is_soldout === 'M') return [];
+    const id = String(product.hash || '');
+    const title = String(product.name || '').trim();
+    const price = Number(product.sell_prc);
+    if (!/^[A-Za-z0-9]+$/.test(id) || !title || !Number.isFinite(price) || price <= 0) return [];
+    const image = String(product.thumb || '');
+    return [{
+      id: `${mall.mallId}:${id}`, mallId: mall.mallId, mallName: mall.name,
+      title, price, shippingFee: product.is_free_dlv === 'Y' ? 0 : null,
+      productUrl: `${mall.origin}/shop/goods_detail?hash=${id}`,
+      imageUrl: image.startsWith('https://') ? image : '', updatedAt: now,
+      dataSourceLabel: '공개 검색 API · 온누리 상품 유형',
+    }];
+  });
+}
+
+async function searchFiveDayResults(mall, query, fetchImpl) {
+  const response = await fetchImpl('https://api.samaint.co.kr/main/product_search_cate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', Accept: 'application/json' },
+    body: new URLSearchParams({ mall_id: 'onnuri', member_id: '', cno: '', cate_gno: '45',
+      search_str: query, request_method: 'POST', page: '1', perPage: '30' }),
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return parseFiveDayResults(await response.json(), mall);
 }
 
 function parsePaldoResults(document, mall, now) {
@@ -314,6 +600,24 @@ async function searchCysoResults(mall, query, fetchImpl) {
 }
 
 function buildSearchUrl(mall, query) {
+  if (mall.kind === 'gonggong' || mall.kind === 'genius' || mall.kind === 'epost') {
+    const paths = { gonggong: '/shop/search.php', genius: '/product/product.html', epost: '/fo/pavln/sijangAll.do' };
+    const keys = { gonggong: 'stx', genius: 'search', epost: 'srchGoodsNm' };
+    const url = new URL(paths[mall.kind], mall.origin);
+    url.searchParams.set(keys[mall.kind], query);
+    if (mall.kind === 'epost') { url.searchParams.set('pageIndex', '1'); url.searchParams.set('searchMCtgryCd', '99'); }
+    return url.toString();
+  }
+  if (mall.kind === 'nuri') {
+    const url = new URL('/shop/search_product.php', mall.origin);
+    url.searchParams.set('sq', query);
+    return url.toString();
+  }
+  if (mall.kind === 'onnuri-shopping') {
+    const url = new URL('/search', mall.origin);
+    url.searchParams.set('searchWrd', query);
+    return url.toString();
+  }
   if (mall.kind === 'paldo') {
     const url = new URL('/goods/search.aspx', mall.origin);
     url.searchParams.set('q', query);
@@ -373,6 +677,21 @@ export async function searchPublicMalls(query, fetchImpl = fetch) {
         } else if (mall.kind === 'cyso') {
           items = { at: Date.now(), value: await searchCysoResults(mall, query, fetchImpl) };
           cache.set(key, items);
+        } else if (mall.kind === 'five-day') {
+          items = { at: Date.now(), value: await searchFiveDayResults(mall, query, fetchImpl) };
+          cache.set(key, items);
+        } else if (mall.kind === 'traditional') {
+          items = { at: Date.now(), value: await searchTraditionalResults(mall, query, fetchImpl) };
+          cache.set(key, items);
+        } else if (mall.kind === 'hmall') {
+          items = { at: Date.now(), value: await searchHmallResults(mall, query, fetchImpl) };
+          cache.set(key, items);
+        } else if (mall.kind === 'elevenst') {
+          items = { at: Date.now(), value: await searchElevenstResults(mall, query, fetchImpl) };
+          cache.set(key, items);
+        } else if (mall.kind === 'lotte') {
+          items = { at: Date.now(), value: await searchLotteResults(mall, query, fetchImpl) };
+          cache.set(key, items);
         } else {
         const response = await fetchImpl(url, {
           headers: { Accept: mall.kind === 'chance' || mall.kind === 'noljang' ? 'application/json' : 'text/html' },
@@ -387,17 +706,23 @@ export async function searchPublicMalls(query, fetchImpl = fetch) {
         } else {
           const html = await response.text();
           const marker = mall.kind === 'paldo' ? 'fnCategoryClick(3130)'
+            : mall.kind === 'gonggong' ? 'frmdetailsearch'
+            : mall.kind === 'genius' ? 'search_bbs'
+            : mall.kind === 'epost' ? 'srchGoodsNm'
+            : mall.kind === 'nuri' ? 'frmsearch1'
+            : mall.kind === 'onnuri-shopping' ? 'searchWrd'
             : mall.kind === 'kkuk-ai' ? 'pro_title'
             : mall.kind === 'market' ? 'searchListKn'
-            : mall.kind === 'hotdeal' ? 'initialPage' : 'item_box';
+            : mall.kind === 'hotdeal' ? 'initialPage' : 'search_form';
           if (!html.includes(marker)) throw new Error('상품 검색 결과를 찾지 못했습니다');
-          value = parsePublicResults(html, mall);
+          value = parsePublicResults(html, mall, undefined, query);
         }
         items = { at: Date.now(), value };
         cache.set(key, items);
         }
       }
-      return { source: { mallId: mall.mallId, status: 'connected', count: items.value.length }, items: items.value };
+      const matchingItems = items.value.filter((item) => matchesSearchQuery(item.title, query));
+      return { source: { mallId: mall.mallId, status: 'connected', count: matchingItems.length }, items: matchingItems };
     } catch {
       return { source: { mallId: mall.mallId, status: 'error', count: 0 }, items: [] };
     }

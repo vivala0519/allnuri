@@ -1,12 +1,12 @@
 # 온누리 찾기 (Allnuri Finder) — 디지털 온누리상품권 온라인몰 통합 검색 플랫폼
 
-> **개인용 시범 구현 (2026-10-28):** 로컬 API 서버가 10개 몰의 공개 검색·온누리 기획전에서 결제 대상 표시가 확인된 상품을 모읍니다. 나머지 쇼핑몰은 검색 바로가기입니다. 공개 페이지 구조나 접근 정책이 바뀌면 수집이 실패할 수 있습니다.
+> **개인용 시범 구현 (2026-10-28):** 로컬 API 서버가 20개 몰의 공개 검색·온누리 기획전 상품을 모읍니다. 일부 쇼핑몰 상품은 결제 가능 여부와 판매 상태를 확인해야 합니다. 나머지 쇼핑몰은 검색 바로가기입니다. 공개 페이지 구조나 접근 정책이 바뀌면 수집이 실패할 수 있습니다.
 
 ## 개인용 통합 검색 실행
 
-Node.js 20 이상과 의존성 설치가 필요합니다. `npm install` 후 `npm run dev` 한 번만 실행하고 `http://localhost:5173`을 엽니다. npm 명령을 쓸 수 없는 환경에서는 `node node_modules/vite/bin/vite.js`로 실행할 수 있습니다. Vite 개발 서버와 프리뷰 서버가 검색 API를 함께 제공합니다. 검색창에 상품명을 입력하면 10개 몰의 상품을 함께 보여줍니다. 온누리 필터 또는 상품별 표시가 확인된 결과만 포함하며, 품절 상품은 제외합니다. 상품가와 배송 정보는 결제 전에 원본 몰에서 다시 확인하세요. 배송비 미확인은 무료배송을 뜻하지 않습니다.
+Node.js 20 이상과 의존성 설치가 필요합니다. `npm install` 후 `npm run dev` 한 번만 실행하고 `http://localhost:5173`을 엽니다. npm 명령을 쓸 수 없는 환경에서는 `node node_modules/vite/bin/vite.js`로 실행할 수 있습니다. Vite 개발 서버와 프리뷰 서버가 검색 API를 함께 제공합니다. 검색창에 상품명을 입력하면 20개 몰의 상품을 함께 보여줍니다. 상품별 결제 가능 여부와 판매 상태가 미확인인 결과는 카드에 별도로 안내합니다. 상품가와 배송 정보는 결제 전에 원본 몰에서 다시 확인하세요. 배송비 미확인은 무료배송을 뜻하지 않습니다.
 
-로컬 검색 API는 Vite 서버의 `/api/onnuri/products` 경로에서 동작합니다. 몰별 요청은 검색어당 5분 동안 캐시하며, 첫 페이지만 수집합니다. 몰 측에서 요청을 차단하거나 HTML 구조가 바뀌면 해당 몰 상태를 오류로 표시합니다. 접근 제한을 우회하지 않습니다. Vercel/Netlify API는 아래의 협의된 JSON 피드 방식만 사용합니다.
+로컬 검색 API는 Vite 서버의 `/api/onnuri/products` 경로에서 동작합니다. 몰별 요청은 검색어당 5분 동안 캐시하며, 대부분 첫 페이지만 수집합니다. 롯데ON은 온누리상생스토어에 노출된 상품 목록에서 검색하므로 전체 상품은 포함하지 않습니다. 몰 측에서 요청을 차단하거나 HTML 구조가 바뀌면 해당 몰 상태를 오류로 표시합니다. 접근 제한을 우회하지 않습니다. Vercel/Netlify API는 아래의 협의된 JSON 피드 방식만 사용합니다.
 
 ## 시범 연동 설정
 
@@ -118,7 +118,7 @@ npm test
 1. **24개 온누리 온라인몰 구조화 데이터 및 검증 체계 (`src/data/malls.ts`)**
    - 고유 ID, 쇼핑몰 이름, 아이콘 코드/컬러, 공식 홈페이지(`homeUrl`), 종합몰 전용관 URL(`dedicatedZoneUrl`), 직접 검색 URL 템플릿(`searchUrlTemplate`), 쇼핑몰 유형(`전용몰` / `전용관` / `검토`), 공식 사용처 검증 상태, 마지막 검증일, 데이터 연동 분류 및 결제 유의사항 완비
 2. **홈페이지 URL과 검색 URL의 엄격한 분리 및 전용관 타겟팅 (`src/utils/searchUrlBuilder.ts`)**
-   - 종합몰 내 전용관은 확인된 검색 URL 또는 전용관 진입 페이지로 연결하며, 온누리 대상 상품을 구분할 수 있는 공개 데이터가 확인된 몰만 상품 통합 검색에 포함
+   - 종합몰 내 전용관은 확인된 검색 URL 또는 전용관 진입 페이지로 연결하며, 상품별 결제 가능 여부가 미확인인 검색 결과에는 별도 안내 표시
    - 고정 URL이 미확정이거나 사용처 재확인이 필요한 쇼핑몰(퍼스트복지몰 온누리, 드림온누리몰 등)은 임의의 추측 URL을 넣지 않고 외부 웹 검색으로 안전 연결
    - 모든 쇼핑몰 카드에 주 검색 링크 외에 구글 웹 검색·네이버 웹 검색 보조 링크 제공
 3. **통합 상품 검색 및 비교 엔진 (`src/services/productAdapter.ts`, `UnifiedProductComparisonSection.tsx`)**
@@ -152,27 +152,27 @@ npm test
 | :--- | :--- | :--- | :---: | :---: | :--- | :--- | :--- |
 | 1 | `onnuri-market-official` | **온누리시장** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://www.onnuri-mall.co.kr/` | 공개 API 미제공 · `site:onnuri-mall.co.kr` 도메인 지정 웹 검색 |
 | 2 | `onnuri-goodday` | **온누리굿데이** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://www.onnurigood.com/` | 쇼핑몰 내부 검색 URL 직접 연결 (`/goods/goods_search.php?keyword=`) |
-| 3 | `onnuri-juntong-sijang` | **온누리전통시장** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://www.onnuri-sijang.com/onnuri/main/pc` | 내부 상품 검색으로 연결 · 상품별 결제 가능 여부 필드 미확인 |
+| 3 | `onnuri-juntong-sijang` | **온누리전통시장** | 전용몰 | 검증완료 (2026-10) | 공개 검색 통합 | `https://www.onnuri-sijang.com/onnuri/main/pc` | 상품별 결제 가능 여부와 판매 상태 확인 필요 |
 | 4 | `inthemarket-onnuri` | **인더마켓온누리몰** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://www.inthemarket.co.kr/` | 쇼핑몰 내부 검색 URL 직접 연결 (`/goods/goods_search.php?keyword=`) |
-| 5 | `onnuri-market-nuri` | **온누리마켓** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://nurimarket.co.kr/` | 공개 API 미제공 · `site:nurimarket.co.kr` 도메인 지정 웹 검색 |
+| 5 | `onnuri-market-nuri` | **온누리마켓** | 전용몰 | 검증완료 (2026-10) | 공개 검색 통합 | `https://nurimarket.co.kr/` | 상품별 결제 가능 여부와 판매 상태 확인 필요 |
 | 6 | `noljang` | **놀장** | 전용몰 | 검증완료 (2026-10-28) | 로컬 공개 검색 | `https://mall.noljang.co.kr/` | 공개 검색 API의 `onuriYn=Y` 상품만 수집 |
-| 7 | `onnuri-shopping` | **온누리쇼핑** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | 미확정 (`null`) | 단일 도메인 미확정 · `"온누리쇼핑" + 검색어` 외부 웹 검색 연결 |
-| 8 | `lotteon-onnuri` | **롯데ON 온누리상생스토어** | 전용관 | 검증완료 (2026-10) | 1. 공식 API/제휴 가능 | 전용관 검색 진입 URL | 롯데ON 내 `"온누리상생스토어 + 검색어"` 전용관 검색 직접 연결 |
+| 7 | `onnuri-shopping` | **온누리쇼핑** | 전용몰 | 검증완료 (2026-10) | 공개 검색 통합 | `https://onnurishop.co.kr/` | 검색 카드의 온누리 표시 상품을 로컬 검색에 포함 |
+| 8 | `lotteon-onnuri` | **롯데ON 온누리상생스토어** | 전용관 | 검증완료 (2026-10) | 공개 검색 통합 | `https://www.lotteon.com/display/shop/seltDpShop/57821` | 전용관 노출 상품 중 온누리 표시와 판매 상태 확인 |
 | 9 | `sijang-to-room` | **시장을방으로** | 전용몰 | 앱 중심 (2026-10) | 2. 검색 링크 연결 | 모바일 앱 중심 (`null`) | 웹 고정 상품 검색 URL 미제공 · 외부 키워드 웹 검색 연결 |
 | 10 | `onnuri-chance` | **온누리찬스** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://onnurichance.com/` | 공개 API 미제공 · `site:onnurichance.com` 도메인 지정 웹 검색 |
 | 11 | `gyeongbuk-cyso` | **경북고향장터 사이소** | 전용관 | 검증완료 (2026-10) | 1. 공개 검색 통합 | `https://www.cyso.co.kr/exhibition/detail?id=1773379812` | 온누리상품권 기획전의 판매 중 상품을 상품명으로 검색 |
-| 12 | `11st-onnuri` | **11번가 온누리마켓** | 전용관 | 검증완료 (2026-10) | 1. 공식 API/제휴 가능 | 전용관 검색 진입 URL | 11번가 Open API 보유 · 현재 `"온누리마켓 + 검색어"` 전용관 직접 연결 |
+| 12 | `11st-onnuri` | **11번가 온누리마켓** | 전용관 | 검증완료 (2026-10) | 공개 검색 통합 | 온누리상품권 검색 필터 | 상품별 온누리 표시와 품절 상태 확인 |
 | 13 | `onnuri-hotdeal` | **온누리핫딜** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://onnurideal.com/` | 공개 API 미제공 · `site:onnurideal.com` 도메인 지정 웹 검색 |
 | 14 | `first-welfare-onnuri` | **퍼스트복지몰 온누리** | 검토 | **재확인 필요** | 3. 제휴/확인 필요 | 미확정 (`null`) | 폐쇄형 복지몰 여부 및 현행 사용처 재확인 필요 · 외부 웹 검색 연결 |
 | 15 | `dream-onnuri-mall` | **드림온누리몰** | 검토 | **재확인 필요** | 3. 제휴/확인 필요 | 미확정 (`null`) | 현행 사용처 유지 여부 및 도메인 재확인 필요 · 외부 웹 검색 연결 |
-| 16 | `onnuri-gonggong-mall` | **온누리공공몰** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://www.ongong.kr/shop/` | 공개 API 미제공 · `site:ongong.kr` 도메인 지정 웹 검색 |
-| 17 | `epost-shopping-onnuri` | **우체국쇼핑** | 전용관 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://mall.epost.go.kr/` | 우체국쇼핑 내 `"온누리 + 검색어"` 조합 내부 검색 직접 연결 |
-| 18 | `onnuri-5iljang` | **온누리5일장** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://www.onnuri5.co.kr/` | 내부 상품명 검색 결과가 없어 공식 도메인 지정 웹 검색 |
+| 16 | `onnuri-gonggong-mall` | **온누리공공몰** | 전용몰 | 검증완료 (2026-10) | 공개 검색 통합 | `https://www.ongong.kr/shop/` | 상품별 결제 가능 여부와 판매 상태 확인 필요 |
+| 17 | `epost-shopping-onnuri` | **우체국쇼핑** | 전용관 | 검증완료 (2026-10) | 공개 검색 통합 | `https://mall.epost.go.kr/fo/pavln/sijangAll.do` | 전통시장관 검색 · 상품별 결제 가능 여부와 판매 상태 확인 필요 |
+| 18 | `onnuri-5iljang` | **온누리5일장** | 전용몰 | 검증완료 (2026-10) | 공개 검색 통합 | `https://www.onnuri5.co.kr/` | 온누리 상품 유형과 판매 상태를 확인한 검색 결과를 로컬 검색에 포함 |
 | 19 | `onnuri-paldo-sijang` | **온누리팔도시장** | 전용몰 | 검증완료 (2026-10) | 1. 공개 검색 통합 | `https://www.e-jangter.com/Extmall/Onnuri.aspx` | 온누리 팔도시장 카테고리 필터 검색 결과 수집 |
 | 20 | `gongyoung-onnuri` | **공영홈쇼핑 온누리장터** | 전용관 | 검증완료 (2026-10) | 1. 공개 검색 통합 | `https://www.gongyoungshop.kr/` | 상품 카드 응답의 온누리 표시와 판매 상태를 확인해 통합 |
 | 21 | `kkuk-ai-onnuri` | **꾹AI:온누리몰** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://onnuri.ai/` | 공개 API 미제공 · `site:onnuri.ai` 도메인 지정 웹 검색 |
-| 22 | `genius-mall` | **지니어스 Mall** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://luxurysystem.co.kr/` | 공개 API 미제공 · `site:luxurysystem.co.kr` 도메인 지정 웹 검색 |
-| 23 | `hyundai-hmall-onnuri` | **현대홈쇼핑 온누리샵** | 전용관 | 검증완료 (2026-10) | 2. 검색 링크 연결 | 전용관 검색 진입 URL | 현대Hmall 내 `"온누리샵 + 검색어"` 전용관 검색 직접 연결 |
+| 22 | `genius-mall` | **지니어스 Mall** | 전용몰 | 검증완료 (2026-10) | 공개 검색 통합 | `https://luxurysystem.co.kr/` | 상품별 결제 가능 여부와 판매 상태 확인 필요 |
+| 23 | `hyundai-hmall-onnuri` | **현대홈쇼핑 온누리샵** | 전용관 | 검증완료 (2026-10) | 공개 검색 통합 | `https://www.hmall.com/md/dpa/searchSpexSectItem?sectId=3132118` | 온누리 필터 검색 · 상품별 결제 가능 및 품절 상태 확인 |
 | 24 | `pirates-mermaid` | **인어교주해적단** | 전용관 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://www.tpirates.com/` | 수산물 플랫폼 · `site:tpirates.com` 도메인 지정 웹 검색 |
 
 ---

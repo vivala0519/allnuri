@@ -150,39 +150,7 @@ export const MallCard: React.FC<MallCardProps> = ({
           </span>
         )}
 
-        {/* 검색/연동 방식 배지 */}
-        <span
-          className={`inline-flex items-center gap-1 px-2 py-1 rounded-md border text-[11px] font-bold ${methodBadge.className}`}
-        >
-          <Link2 className="w-3 h-3" aria-hidden="true" />
-          <span>{methodBadge.text}</span>
-        </span>
-
-        {mall.integrationCategory === 'official_api_available' && (
-          <span className="px-2 py-1 rounded-md bg-purple-50 text-purple-800 border border-purple-200 text-[11px] font-extrabold">
-            공식 Open API/제휴 연동 가능
-          </span>
-        )}
-        {mall.integrationCategory === 'public_search' && (
-          <span className="px-2 py-1 rounded-md bg-teal-50 text-teal-800 border border-teal-200 text-[11px] font-extrabold">
-            로컬 상품 통합 검색
-          </span>
-        )}
       </div>
-
-      {/* 주요 취급 품목 태그 */}
-      {mall.categories.length > 0 && (
-        <div className="mt-2.5 flex flex-wrap gap-1">
-          {mall.categories.map((cat) => (
-            <span
-              key={cat}
-              className="text-[11px] text-[#6d7c73] bg-[#f7f9f7] px-2 py-0.5 rounded"
-            >
-              #{cat}
-            </span>
-          ))}
-        </div>
-      )}
 
       {/* 쇼핑몰별 온누리 결제 유의사항 안내 */}
       <div
@@ -234,6 +202,42 @@ export const MallCard: React.FC<MallCardProps> = ({
           )}
         </div>
 
+        <details className="text-[11px] text-[#78877e]">
+          <summary className="cursor-pointer font-bold">상세 정보와 보조 검색</summary>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+        {/* 검색/연동 방식 배지 */}
+        <span
+          className={`inline-flex items-center gap-1 px-2 py-1 rounded-md border text-[11px] font-bold ${methodBadge.className}`}
+        >
+          <Link2 className="w-3 h-3" aria-hidden="true" />
+          <span>{methodBadge.text}</span>
+        </span>
+
+        {mall.integrationCategory === 'official_api_available' && (
+          <span className="px-2 py-1 rounded-md bg-purple-50 text-purple-800 border border-purple-200 text-[11px] font-extrabold">
+            공식 Open API/제휴 연동 가능
+          </span>
+        )}
+        {mall.integrationCategory === 'public_search' && (
+          <span className="px-2 py-1 rounded-md bg-teal-50 text-teal-800 border border-teal-200 text-[11px] font-extrabold">
+            로컬 상품 통합 검색
+          </span>
+        )}
+          </div>
+      {/* 주요 취급 품목 태그 */}
+      {mall.categories.length > 0 && (
+        <div className="mt-2.5 flex flex-wrap gap-1">
+          {mall.categories.map((cat) => (
+            <span
+              key={cat}
+              className="text-[11px] text-[#6d7c73] bg-[#f7f9f7] px-2 py-0.5 rounded"
+            >
+              #{cat}
+            </span>
+          ))}
+        </div>
+      )}
+
         {/* 보조 외부 검색 링크 (구글/네이버 웹 검색) */}
         <div className="flex items-center justify-between text-[11px] text-[#78877e] px-1">
           <span>보조 검색 연결:</span>
@@ -256,6 +260,7 @@ export const MallCard: React.FC<MallCardProps> = ({
             </a>
           </div>
         </div>
+        </details>
       </div>
     </article>
   );

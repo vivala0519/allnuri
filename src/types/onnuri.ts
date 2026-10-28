@@ -89,6 +89,8 @@ export interface UnifiedProduct {
   updatedAt: string;
   /** 데이터 연동 출처 표시 */
   dataSourceLabel: string;
+  /** 상품별 디지털 온누리 결제 가능 여부가 확인되지 않은 경우 */
+  eligibility?: 'unknown';
 }
 
 export type ProductSortOption = 'relevance' | 'price_asc' | 'price_desc';

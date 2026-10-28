@@ -1,5 +1,5 @@
 import React from 'react';
-import { Filter, RotateCcw, Search, Store } from 'lucide-react';
+import { Filter, RotateCcw, Search } from 'lucide-react';
 import { MallKind, OnnuriMall } from '../types/onnuri';
 import { MallCard } from './MallCard';
 
@@ -63,10 +63,6 @@ export const MallDirectorySection: React.FC<MallDirectorySectionProps> = ({
       {/* 섹션 헤더 */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
         <div>
-          <div className="inline-flex items-center gap-1.5 text-xs font-extrabold text-onnuri-green mb-1">
-            <Store className="w-3.5 h-3.5" aria-hidden="true" />
-            <span>디지털 온누리 사용처 전체 디렉터리</span>
-          </div>
           <h2
             id="malls-title"
             className="text-2xl sm:text-3xl font-black tracking-tight text-onnuri-ink"
@@ -74,13 +70,10 @@ export const MallDirectorySection: React.FC<MallDirectorySectionProps> = ({
             온라인 쇼핑몰 모아보기
           </h2>
           <p className="text-xs sm:text-sm text-[#6d7c74] mt-1">
-            기존 수록된 23곳과 최신 사용처 목록에서 확인된 1곳(총 24곳)의 홈페이지·전용관·검색 링크를 관리합니다.
+            쇼핑몰을 둘러보고 즐겨찾기에 저장해 보세요.
           </p>
         </div>
 
-        <span className="self-start sm:self-auto text-xs font-extrabold text-onnuri-green bg-[#ebf5ef] px-3.5 py-2 rounded-xl border border-[#d4e9dc]">
-          사용처 검증 기준 · 2026년 10월 공개 목록
-        </span>
       </div>
 
       {/* 필터 및 검색 컨트롤 영역 */}
@@ -133,7 +126,9 @@ export const MallDirectorySection: React.FC<MallDirectorySectionProps> = ({
         </div>
 
         {/* 2행: 연동 방식별 필터 + 특정 쇼핑몰 선택 + 쇼핑몰 이름 검색 */}
-        <div className="pt-3 border-t border-onnuri-line/70 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <details className="pt-3 border-t border-onnuri-line/70">
+          <summary className="cursor-pointer text-xs sm:text-sm font-bold text-[#5d6963]">상세 필터</summary>
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {/* 연동/검색 방식 필터 */}
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-onnuri-green flex-shrink-0" aria-hidden="true" />
@@ -189,7 +184,8 @@ export const MallDirectorySection: React.FC<MallDirectorySectionProps> = ({
               className="w-full text-xs sm:text-[13px] font-semibold text-onnuri-ink bg-white border border-[#dce4dd] rounded-xl pl-9 pr-3 py-2.5 focus:outline-none focus:border-onnuri-green"
             />
           </div>
-        </div>
+          </div>
+        </details>
       </div>
 
       {/* 검색 결과 요약 바 */}
@@ -198,21 +194,8 @@ export const MallDirectorySection: React.FC<MallDirectorySectionProps> = ({
         aria-live="polite"
         className="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-[13px] text-[#6d7b72] mb-4 px-1"
       >
-        <span>
-          총 <strong className="text-onnuri-green font-extrabold">{filteredMalls.length}곳</strong>의 쇼핑몰 표시 중{' '}
-          {keyword.trim() ? (
-            <>
-              · <strong className="text-onnuri-green font-extrabold">“{keyword.trim()}”</strong> 쇼핑몰별 검색 링크 준비됨
-            </>
-          ) : (
-            '· 검색어를 입력하면 쇼핑몰별 맞춤형 상품 검색 링크가 생성됩니다.'
-          )}
-        </span>
-        <span>
-          {keyword.trim()
-            ? '각 카드의 검색 버튼을 누르면 새 창에서 해당 쇼핑몰 검색 결과로 이동합니다'
-            : '최신 가맹 여부는 온누리 공식 사이트 및 주문 결제창에서 최종 확인하세요'}
-        </span>
+        <span>총 <strong className="text-onnuri-green font-extrabold">{filteredMalls.length}곳</strong></span>
+        <button type="button" onClick={onResetFilters} className="font-bold hover:text-onnuri-green">필터 초기화</button>
       </div>
 
       {/* 쇼핑몰 카드 그리드 (모바일 1열, 태블릿 2열, PC 3열) */}

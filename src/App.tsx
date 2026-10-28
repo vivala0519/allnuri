@@ -201,17 +201,6 @@ export function App() {
     setFavOnly(false);
   }, []);
 
-  const verifiedMallsCount = useMemo(
-    () => ONNURI_MALLS.filter((m) => m.verificationStatus !== 'needs_review').length,
-    []
-  );
-  const directOrDomainMallsCount = useMemo(
-    () =>
-      ONNURI_MALLS.filter(
-        (m) => m.searchUrlTemplate !== null || m.homeUrl !== null || m.dedicatedZoneUrl !== null
-      ).length,
-    []
-  );
 
   return (
     <div id="top" className="min-h-screen flex flex-col bg-white text-onnuri-ink">
@@ -227,18 +216,12 @@ export function App() {
         {/* 2 & 3. 통합 상품 검색 영역 + 추천/최근 검색어 */}
         <HeroSearchSection
           query={queryInput}
-          onQueryChange={(val) => {
-            setQueryInput(val);
-            setCommittedQuery(val);
-          }}
+          onQueryChange={setQueryInput}
           onSubmitSearch={handleSubmitSearch}
           recentQueries={recentQueries}
           onRemoveRecentQuery={handleRemoveRecentQuery}
           onClearRecentQueries={handleClearRecentQueries}
           onShareSearchUrl={handleShareSearchUrl}
-          totalMallsCount={ONNURI_MALLS.length}
-          verifiedMallsCount={verifiedMallsCount}
-          directSearchMallsCount={directOrDomainMallsCount}
         />
 
         {/* 4. 통합 상품 비교 및 직접 검색 바로가기 섹션 */}
@@ -276,10 +259,11 @@ export function App() {
         />
 
         {/* 쇼핑몰별 데이터 연동 상태표 */}
-        <IntegrationStatusTableSection malls={ONNURI_MALLS} />
-
-        {/* 7. 사용 방법 및 유의사항 */}
-        <UsageGuideSection />
+        <details className="max-w-[1140px] mx-auto px-4 sm:px-6 border-t border-onnuri-line">
+          <summary className="py-5 cursor-pointer text-sm font-bold text-[#52665a]">이용 안내 및 연동 정보</summary>
+          <UsageGuideSection />
+          <IntegrationStatusTableSection malls={ONNURI_MALLS} />
+        </details>
       </main>
 
       {/* 8. 푸터 */}

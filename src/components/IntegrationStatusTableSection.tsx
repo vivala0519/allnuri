@@ -182,7 +182,7 @@ export const IntegrationStatusTableSection: React.FC<
           </div>
           <ul className="list-disc list-inside space-y-1">
             <li>
-              <strong>현재:</strong> 10개 몰의 공개 검색 결과에서 온누리 필터·배지·결제 가능 필드가 확인된 상품을 로컬에서 통합 검색
+              <strong>현재:</strong> 20개 몰의 공개 검색 결과를 로컬에서 통합 검색합니다. 결제 가능 여부와 판매 상태가 미확인인 상품은 카드에 별도로 안내합니다.
             </li>
             <li>
               <strong>확장:</strong> 나머지 몰은 상품별 온누리 결제 대상 여부를 확인할 수 있는 공개 데이터가 발견되면 추가하고, 확인 전에는 검색 링크 제공

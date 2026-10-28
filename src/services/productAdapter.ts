@@ -6,6 +6,7 @@ import {
   UnifiedProduct,
 } from '../types/onnuri';
 import { buildMallPrimarySearchUrl } from '../utils/searchUrlBuilder';
+import { matchesSearchQuery } from '../utils/searchMatch.mjs';
 
 /**
  * 상품명에서 규격·중량·용량(예: 10kg, 20kg, 500g, 2L x 6개 등)을 추출합니다.
@@ -134,6 +135,7 @@ export function normalizeRawProduct(raw: Record<string, unknown>): UnifiedProduc
     parsedSpec: extractProductSpec(title),
     updatedAt,
     dataSourceLabel,
+    eligibility: raw.eligibility === 'unknown' ? 'unknown' : undefined,
   };
 }
 
@@ -184,7 +186,7 @@ export class OfficialApiProxyAdapter implements ProductSearchAdapter {
       const rawItems = Array.isArray(payload?.items) ? payload.items : [];
       const normalized = rawItems
         .map((item) => normalizeRawProduct(item))
-        .filter((item): item is UnifiedProduct => item !== null);
+        .filter((item): item is UnifiedProduct => item !== null && matchesSearchQuery(item.title, query));
 
       const sources = Array.isArray(payload?.sources) ? payload.sources : [];
       return sources.flatMap((source) => {
@@ -254,15 +256,7 @@ export async function executeUnifiedSearch(
   const allResponses = [...apiResponses, ...linkResponses];
 
   // 사용자가 직접 업로드/연결한 검증된 실제 상품 피드 데이터 필터링
-  const tokens = trimmed
-    .toLowerCase()
-    .split(/\s+/)
-    .filter(Boolean);
-  const matchedCustomProducts = customItems.filter((item) => {
-    if (!tokens.length) return true;
-    const target = `${item.title} ${item.mallName} ${item.parsedSpec || ''}`.toLowerCase();
-    return tokens.every((t) => target.includes(t));
-  });
+  const matchedCustomProducts = customItems.filter((item) => matchesSearchQuery(item.title, trimmed));
 
   const apiProducts = apiResponses.flatMap((r) => r.products);
   return {
