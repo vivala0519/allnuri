@@ -162,7 +162,7 @@ export const UnifiedProductComparisonSection: React.FC<
               )}
             </h2>
             <p className="text-xs sm:text-sm text-[#687770] mt-1">
-              공식 API·검증 데이터가 연결된 쇼핑몰은 상품 가격과 배송비를 직접 비교하고, API 미제공 쇼핑몰은 전용관·내부 검색 결과로 즉시 연결합니다.
+              개인용 로컬 검색에서 온누리 표시 상품을 모아 보여줍니다. 배송비가 확인되지 않은 상품은 상품 페이지에서 확인하세요.
             </p>
           </div>
 
@@ -245,7 +245,7 @@ export const UnifiedProductComparisonSection: React.FC<
                   <span>쇼핑몰 검색 어댑터(ProductSearchAdapter) 연동 상태 및 테스트</span>
                 </h3>
                 <p className="text-xs text-[#64736c] mt-1">
-                  API 키를 프런트엔드에 노출하지 않기 위해 백엔드 프록시 엔드포인트를 연결하거나, 수집된 실제 상품 JSON 피드를 주입하여 통합 가격 비교·규격 분리·정렬 기능을 검증할 수 있습니다.
+                  제휴 쇼핑몰 피드를 백엔드 검색 API에 연결하거나, 수집된 실제 상품 JSON 피드를 주입하여 가격 비교·규격 분리·정렬 기능을 검증할 수 있습니다.
                 </p>
               </div>
             </div>
@@ -269,9 +269,9 @@ export const UnifiedProductComparisonSection: React.FC<
                       }`}
                     >
                       {resp.status === 'connected'
-                        ? 'API 연결됨'
+                          ? '상품 검색 연결됨'
                         : resp.status === 'unconfigured_api_key'
-                          ? 'Open API 지원 (프록시 미설정)'
+                          ? '프록시 미설정'
                           : resp.status === 'error'
                             ? '연동 오류'
                             : '직접/웹 검색 연결'}
@@ -428,8 +428,8 @@ export const UnifiedProductComparisonSection: React.FC<
                   <span className="text-xs font-bold text-[#5d6963] mr-1">정렬:</span>
                   {(
                     [
-                      { key: 'price_asc', label: '낮은 가격순(총구매가)' },
-                      { key: 'price_desc', label: '높은 가격순(총구매가)' },
+                      { key: 'price_asc', label: '낮은 상품가순' },
+                      { key: 'price_desc', label: '높은 상품가순' },
                       { key: 'relevance', label: '관련도순' },
                     ] as { key: ProductSortOption; label: string }[]
                   ).map((opt) => (
@@ -507,12 +507,12 @@ export const UnifiedProductComparisonSection: React.FC<
                             배송비
                           </span>
                           <span className="font-bold">
-                            {item.shippingFee === 0 ? '무료배송' : `+${formatKRW(item.shippingFee)}`}
+                            {item.shippingFee === null ? '배송비 미확인' : item.shippingFee === 0 ? '무료배송' : `+${formatKRW(item.shippingFee)}`}
                           </span>
                         </div>
                         <div className="pt-1.5 border-t border-onnuri-line flex items-baseline justify-between">
                           <span className="text-xs font-extrabold text-onnuri-ink">
-                            총구매 예상 금액
+                            {item.shippingFee === null ? '상품가 (배송비 별도 확인)' : '총구매 예상 금액'}
                           </span>
                           <strong className="text-lg font-black text-onnuri-green">
                             {formatKRW(item.totalPrice)}
@@ -552,15 +552,17 @@ export const UnifiedProductComparisonSection: React.FC<
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="text-sm sm:text-base font-extrabold text-onnuri-ink">
-                      실시간 상품 DB 미연결 상태 안내 (가짜 상품·가격 미생성 원칙)
+                      검색된 상품이 없습니다
                     </h3>
                     <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 text-[11px] font-bold">
                       검색 링크 연결 모드 작동 중
                     </span>
                   </div>
                   <p className="text-xs sm:text-[13px] text-[#5c6c63] leading-relaxed mt-1">
-                    현재 참여 쇼핑몰의 공식 상품 API 키 또는 백엔드 프록시가 연결되지 않아 임의의 가짜 상품이나 가격·재고를 표시하지 않습니다.
-                    상단 <strong>검증된 전용관 검색 바로가기(7곳)</strong> 또는 아래 <strong>24개 전체 쇼핑몰 카드</strong>의 검색 버튼을 누르면{' '}
+                    {adapterResponses.some((response) => response.status === 'error')
+                      ? '쇼핑몰 검색 요청에 실패했습니다. 검색 결과 바로가기로 원본 몰을 확인하세요.'
+                      : '공개 검색 페이지에서 일치하는 디지털 온누리 상품을 찾지 못했습니다.'}
+                    상단 <strong>검증된 검색 바로가기</strong> 또는 아래 <strong>24개 전체 쇼핑몰 카드</strong>의 검색 버튼을 누르면{' '}
                     <strong className="text-onnuri-green">“{activeQuery}”</strong> 실제 판매 페이지로 즉시 연결됩니다.
                   </p>
                 </div>

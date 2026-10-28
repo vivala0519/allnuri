@@ -15,6 +15,11 @@ export const IntegrationStatusTableSection: React.FC<
 
   const getCategoryLabel = (cat: OnnuriMall['integrationCategory']) => {
     switch (cat) {
+      case 'public_search':
+        return {
+          text: '로컬 공개 검색 상품 수집',
+          badgeClass: 'bg-teal-50 text-teal-800 border-teal-200',
+        };
       case 'official_api_available':
         return {
           text: '1단계: 공식 API/제휴 연동 가능',
@@ -58,6 +63,9 @@ export const IntegrationStatusTableSection: React.FC<
           </div>
 
           <div className="flex flex-wrap gap-2 text-xs font-bold">
+            <span className="px-2.5 py-1 rounded-lg bg-teal-50 text-teal-800 border border-teal-200">
+              로컬 상품 수집: {malls.filter((m) => m.integrationCategory === 'public_search').length}곳
+            </span>
             <span className="px-2.5 py-1 rounded-lg bg-purple-50 text-purple-800 border border-purple-200">
               공식 API/제휴 가능: {malls.filter((m) => m.integrationCategory === 'official_api_available').length}곳
             </span>
@@ -170,14 +178,14 @@ export const IntegrationStatusTableSection: React.FC<
         <div className="mt-5 p-4 rounded-2xl bg-[#f7faf8] border border-[#dce8df] text-xs text-[#4f6156] leading-relaxed">
           <div className="font-extrabold text-onnuri-ink flex items-center gap-1.5 mb-1">
             <Database className="w-3.5 h-3.5 text-onnuri-green" />
-            <span>향후 실시간 상품 통합 검색 완성을 위한 기술 로드맵</span>
+            <span>현재 연동 범위와 확장 과제</span>
           </div>
           <ul className="list-disc list-inside space-y-1">
             <li>
-              <strong>1단계 (공식 Open API 연동):</strong> 11번가 Open API(ProductSearch) 등 공개 API 제공 플랫폼에 대해 서버리스 백엔드 프록시(Vercel Functions / Node.js)를 구성하고 온누리마켓 전용 셀러·카테고리 필터를 적용하여 실시간 가격·배송비 수집
+              <strong>현재:</strong> 10개 몰의 공개 검색 결과에서 온누리 필터·배지·결제 가능 필드가 확인된 상품을 로컬에서 통합 검색
             </li>
             <li>
-              <strong>2단계 (전용몰 표준 상품 피드 제휴):</strong> 온누리굿데이, 인더마켓온누리몰, 온누리시장 등 중소 전용몰(카페24/고도몰 기반)과 네이버쇼핑 EP(상품 DB URL) 형식의 일일 상품 피드 제휴 체결
+              <strong>확장:</strong> 나머지 몰은 상품별 온누리 결제 대상 여부를 확인할 수 있는 공개 데이터가 발견되면 추가하고, 확인 전에는 검색 링크 제공
             </li>
             <li>
               <strong>3단계 (단위가격 및 규격 정규화 고도화):</strong> 현재 구현된 <code>extractProductSpec()</code> 규격 파서를 확장하여 100g당·1kg당 단위가격 자동 계산 및 묶음상품 비교 제공

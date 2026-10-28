@@ -12,6 +12,7 @@ export type VerificationStatus =
  * 3. affiliate_or_verification_needed: 추가 제휴 계약 필요 또는 현행 사용처 확인 필요
  */
 export type IntegrationCategory =
+  | 'public_search'
   | 'official_api_available'
   | 'search_link_only'
   | 'affiliate_or_verification_needed';
@@ -77,7 +78,7 @@ export interface UnifiedProduct {
   /** 상품 가격 (원) */
   price: number;
   /** 배송비 (원, 0이면 무료배송) */
-  shippingFee: number;
+  shippingFee: number | null;
   /** 총구매 예상 금액 (상품 가격 + 배송비) */
   totalPrice: number;
   /** 상품 상세 페이지 URL */

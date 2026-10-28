@@ -3,6 +3,11 @@
   publish = "dist"
 
 [[redirects]]
+  from = "/api/onnuri/products"
+  to = "/.netlify/functions/products"
+  status = 200
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200

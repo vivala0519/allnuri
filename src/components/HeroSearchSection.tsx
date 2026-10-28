@@ -76,8 +76,8 @@ export const HeroSearchSection: React.FC<HeroSearchSectionProps> = ({
 
             <p className="text-sm sm:text-base text-[#586861] leading-relaxed mb-5 max-w-2xl">
               여러 디지털 온누리상품권 사용처 쇼핑몰을 일일이 돌아다니지 마세요.
-              검색어 한 번으로 <strong>24개 온누리 온라인몰·전용관</strong>의 상품 검색 결과와
-              연동 데이터를 한곳에서 확인하고 비교할 수 있습니다.
+              검색어 한 번으로 <strong>10개 몰의 디지털 온누리 대상 상품</strong>을 모아 보고,
+              나머지 쇼핑몰의 검색 결과로 바로 이동할 수 있습니다.
             </p>
 
             {/* 핵심 통계 요약 */}
@@ -319,9 +319,8 @@ export const HeroSearchSection: React.FC<HeroSearchSectionProps> = ({
             <strong className="text-onnuri-green font-extrabold">
               데이터 연동 방식 및 이용 안내:
             </strong>{' '}
-            현재 대부분의 온누리 온라인몰은 외부 공개 상품 API를 제공하지 않습니다. 본 플랫폼은{' '}
-            <strong>무단 크롤링이나 가짜 상품·가격 생성을 하지 않으며</strong>, 공식 Open API/제휴 피드가 연결된 경우에만
-            실시간 상품 가격 비교 카드를 표시하고, 그 외 쇼핑몰은{' '}
+            개인용 로컬 검색은 10개 몰의 공개 검색 결과에서{' '}
+                <strong>온누리 대상이 확인된 상품</strong>을 모아 보여줍니다. 그 외 쇼핑몰은{' '}
             <strong>검증된 전용관 직접 검색 URL</strong> 또는{' '}
             <strong>공식 도메인 지정 웹 검색</strong>으로 즉시 연결합니다. 종합몰(11번가·롯데ON·우체국쇼핑·공영홈쇼핑·현대Hmall 등)은
             일반 상품이 아닌 <strong>온누리 전용관 표시 상품만</strong> 디지털 온누리상품권 결제가 가능합니다.

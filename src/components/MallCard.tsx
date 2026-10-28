@@ -163,6 +163,11 @@ export const MallCard: React.FC<MallCardProps> = ({
             공식 Open API/제휴 연동 가능
           </span>
         )}
+        {mall.integrationCategory === 'public_search' && (
+          <span className="px-2 py-1 rounded-md bg-teal-50 text-teal-800 border border-teal-200 text-[11px] font-extrabold">
+            로컬 상품 통합 검색
+          </span>
+        )}
       </div>
 
       {/* 주요 취급 품목 태그 */}

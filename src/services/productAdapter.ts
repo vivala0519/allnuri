@@ -34,8 +34,8 @@ export function extractProductSpec(title: string): string | null {
 
 /**
  * 통합 상품 목록을 정렬합니다.
- * - price_asc: 총구매 예상 금액(상품가 + 배송비) 낮은 순
- * - price_desc: 총구매 예상 금액(상품가 + 배송비) 높은 순
+ * - price_asc: 상품가 낮은 순 (배송비 미확인 상품도 공정하게 비교)
+ * - price_desc: 상품가 높은 순
  * - relevance: 검색어 및 규격 일치도 높은 순
  */
 export function sortUnifiedProducts(
@@ -52,11 +52,11 @@ export function sortUnifiedProducts(
   const querySpec = extractProductSpec(query);
 
   if (sortBy === 'price_asc') {
-    return list.sort((a, b) => a.totalPrice - b.totalPrice || a.price - b.price);
+    return list.sort((a, b) => a.price - b.price);
   }
 
   if (sortBy === 'price_desc') {
-    return list.sort((a, b) => b.totalPrice - a.totalPrice || b.price - a.price);
+    return list.sort((a, b) => b.price - a.price);
   }
 
   // 관련도순 정렬: 검색어 토큰 일치 개수 및 규격(예: 10kg) 정확 일치 여부 우선
@@ -78,7 +78,7 @@ export function sortUnifiedProducts(
   return list.sort((a, b) => {
     const diff = scoreProduct(b) - scoreProduct(a);
     if (diff !== 0) return diff;
-    return a.totalPrice - b.totalPrice;
+    return a.price - b.price;
   });
 }
 
@@ -97,7 +97,7 @@ export function normalizeRawProduct(raw: Record<string, unknown>): UnifiedProduc
       : null;
   const price = typeof raw.price === 'number' && raw.price >= 0 ? raw.price : null;
   const shippingFee =
-    typeof raw.shippingFee === 'number' && raw.shippingFee >= 0 ? raw.shippingFee : 0;
+    typeof raw.shippingFee === 'number' && raw.shippingFee >= 0 ? raw.shippingFee : null;
 
   if (!id || !mallId || !title || !productUrl || price === null) {
     return null;
@@ -129,7 +129,7 @@ export function normalizeRawProduct(raw: Record<string, unknown>): UnifiedProduc
     imageUrl,
     price,
     shippingFee,
-    totalPrice: price + shippingFee,
+    totalPrice: price + (shippingFee ?? 0),
     productUrl,
     parsedSpec: extractProductSpec(title),
     updatedAt,
@@ -144,15 +144,15 @@ export function normalizeRawProduct(raw: Record<string, unknown>): UnifiedProduc
  */
 export class OfficialApiProxyAdapter implements ProductSearchAdapter {
   id = 'official-api-proxy';
-  name = '공식 오픈API 백엔드 프록시 어댑터 (11번가 온누리마켓 / 제휴몰)';
-  supportedMallIds = ['11st-onnuri', 'lotteon-onnuri'];
+  name = '상품 검색 어댑터';
+  supportedMallIds: string[] = [];
 
   private proxyEndpoint: string | null;
 
   constructor(customEndpoint?: string) {
     const envUrl = import.meta.env.VITE_ONNURI_API_PROXY_URL;
     this.proxyEndpoint =
-      customEndpoint?.trim() || (typeof envUrl === 'string' && envUrl.trim() ? envUrl.trim() : null);
+      customEndpoint?.trim() || (typeof envUrl === 'string' && envUrl.trim() ? envUrl.trim() : '/api/onnuri/products');
   }
 
   isConfigured(): boolean {
@@ -161,19 +161,8 @@ export class OfficialApiProxyAdapter implements ProductSearchAdapter {
 
   async searchProducts(query: string): Promise<AdapterSearchResponse[]> {
     const now = new Date().toISOString();
-    const targetMalls = ONNURI_MALLS.filter((m) => this.supportedMallIds.includes(m.id));
-
-    if (!this.proxyEndpoint) {
-      return targetMalls.map((mall) => ({
-        mallId: mall.id,
-        mallName: mall.name,
-        status: 'unconfigured_api_key',
-        message:
-          '공식 Open API/제휴 연동 지원 대상이나 현재 환경에 백엔드 API 프록시(VITE_ONNURI_API_PROXY_URL)가 설정되지 않아 쇼핑몰 전용관 직접 검색 링크로 연결합니다.',
-        products: [],
-        directSearchUrl: buildMallPrimarySearchUrl(mall, query),
-        fetchedAt: now,
-      }));
+    if (!this.proxyEndpoint || !query.trim()) {
+      return [];
     }
 
     try {
@@ -188,35 +177,47 @@ export class OfficialApiProxyAdapter implements ProductSearchAdapter {
         throw new Error(`API 응답 오류 (HTTP ${response.status})`);
       }
 
-      const payload = (await response.json()) as { items?: Record<string, unknown>[] };
+      const payload = (await response.json()) as {
+        items?: Record<string, unknown>[];
+        sources?: { mallId: string; status: 'connected' | 'error'; count: number }[];
+      };
       const rawItems = Array.isArray(payload?.items) ? payload.items : [];
       const normalized = rawItems
         .map((item) => normalizeRawProduct(item))
         .filter((item): item is UnifiedProduct => item !== null);
 
-      return targetMalls.map((mall) => {
+      const sources = Array.isArray(payload?.sources) ? payload.sources : [];
+      return sources.flatMap((source) => {
+        const mall = ONNURI_MALLS.find((m) => m.id === source.mallId);
+        if (!mall) return [];
         const mallProducts = normalized.filter((p) => p.mallId === mall.id);
-        return {
+        return [{
           mallId: mall.id,
           mallName: mall.name,
-          status: 'connected',
-          message: `${mallProducts.length}건의 실제 상품 데이터를 수신했습니다.`,
+          status: source.status,
+          message: source.status === 'connected'
+            ? `${mallProducts.length}건의 상품을 검색했습니다.`
+            : '상품 검색 결과를 가져오지 못했습니다.',
           products: mallProducts,
           directSearchUrl: buildMallPrimarySearchUrl(mall, query),
           fetchedAt: now,
-        };
+        }];
       });
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : '알 수 없는 네트워크 오류';
-      return targetMalls.map((mall) => ({
-        mallId: mall.id,
-        mallName: mall.name,
-        status: 'error',
-        message: `상품 API 호출 실패 (${errorMsg}) · 직접 검색 링크를 이용해 주세요.`,
-        products: [],
-        directSearchUrl: buildMallPrimarySearchUrl(mall, query),
-        fetchedAt: now,
-      }));
+      console.error('상품 API 호출 실패', err);
+      return ['onnuri-market-official', 'onnuri-goodday', 'inthemarket-onnuri', 'kkuk-ai-onnuri', 'onnuri-chance', 'onnuri-hotdeal'].flatMap((mallId) => {
+        const mall = ONNURI_MALLS.find((item) => item.id === mallId);
+        if (!mall) return [];
+        return [{
+          mallId: mall.id,
+          mallName: mall.name,
+          status: 'error' as const,
+          message: err instanceof Error ? err.message : '검색 API 연결 실패',
+          products: [],
+          directSearchUrl: buildMallPrimarySearchUrl(mall, query),
+          fetchedAt: now,
+        }];
+      });
     }
   }
 }

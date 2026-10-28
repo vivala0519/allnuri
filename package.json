@@ -6,6 +6,7 @@
   "description": "디지털 온누리상품권 온라인몰 통합 검색 플랫폼 (온누리 찾기)",
   "scripts": {
     "dev": "vite",
+    "dev:api": "node scripts/feed-server.mjs",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",

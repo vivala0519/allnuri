@@ -1,5 +1,23 @@
 # 온누리 찾기 (Allnuri Finder) — 디지털 온누리상품권 온라인몰 통합 검색 플랫폼
 
+> **개인용 시범 구현 (2026-10-28):** 로컬 API 서버가 10개 몰의 공개 검색·온누리 기획전에서 결제 대상 표시가 확인된 상품을 모읍니다. 나머지 쇼핑몰은 검색 바로가기입니다. 공개 페이지 구조나 접근 정책이 바뀌면 수집이 실패할 수 있습니다.
+
+## 개인용 통합 검색 실행
+
+Node.js 20 이상과 의존성 설치가 필요합니다. `npm install` 후 `npm run dev` 한 번만 실행하고 `http://localhost:5173`을 엽니다. npm 명령을 쓸 수 없는 환경에서는 `node node_modules/vite/bin/vite.js`로 실행할 수 있습니다. Vite 개발 서버와 프리뷰 서버가 검색 API를 함께 제공합니다. 검색창에 상품명을 입력하면 10개 몰의 상품을 함께 보여줍니다. 온누리 필터 또는 상품별 표시가 확인된 결과만 포함하며, 품절 상품은 제외합니다. 상품가와 배송 정보는 결제 전에 원본 몰에서 다시 확인하세요. 배송비 미확인은 무료배송을 뜻하지 않습니다.
+
+로컬 검색 API는 Vite 서버의 `/api/onnuri/products` 경로에서 동작합니다. 몰별 요청은 검색어당 5분 동안 캐시하며, 첫 페이지만 수집합니다. 몰 측에서 요청을 차단하거나 HTML 구조가 바뀌면 해당 몰 상태를 오류로 표시합니다. 접근 제한을 우회하지 않습니다. Vercel/Netlify API는 아래의 협의된 JSON 피드 방식만 사용합니다.
+
+## 시범 연동 설정
+
+협의된 쇼핑몰의 JSON 피드 URL을 서버 환경변수 `ONNURI_FEEDS_JSON`에 설정합니다. 배열은 최대 3곳이며 `mallId`는 `src/data/malls.ts`의 ID와 일치해야 합니다. 각 피드 항목에는 `id`, `title`, `price`, `productUrl`, `onnuriEligible: true`가 필요합니다. 결제 가능 여부가 명시되지 않은 상품은 검색 결과에서 제외됩니다. 선택 필드: `shippingFee`, `imageUrl`, `updatedAt`. 비공개 피드는 설정 항목의 `token`으로 Bearer 인증할 수 있습니다.
+
+```json
+[{"mallId":"onnuri-goodday","name":"온누리굿데이","url":"https://partner.example/products.json"}]
+```
+
+협의된 JSON 피드가 생기면 로컬에서는 `.env.example`을 `.env.local`로 복사해 `ONNURI_FEEDS_JSON`을 설정하고 `npm run dev`를 실행합니다. Vercel 또는 Netlify 배포에서는 `ONNURI_FEEDS_JSON`을 서버 환경변수로 설정합니다. 실제 피드가 제공되기 전에는 예시 URL을 설정하지 마세요.
+
 디지털 온누리상품권(카드형·모바일 통합 앱)을 사용할 수 있는 **24개 온라인 쇼핑몰 및 종합몰 내 전용관**을 한곳에서 검색하고, 쇼핑몰별 상품 검색 결과 연결 및 연동 데이터의 가격·규격 비교를 제공하는 웹 애플리케이션입니다.
 
 기존 단일 파일 시제품(`onnuri_unified_search_demo.html`)의 브랜드 컬러(`#18795f`)와 카드형 UI, 기존 기능(24개 쇼핑몰 목록, 즐겨찾기 `localStorage` 호환 등)을 100% 보존하면서 **React + TypeScript + Vite + Tailwind CSS** 기반의 실제 운영·배포 가능한 아키텍처로 발전시켰습니다.
@@ -98,9 +116,9 @@ npm test
 
 ### 구현 완료된 기능
 1. **24개 온누리 온라인몰 구조화 데이터 및 검증 체계 (`src/data/malls.ts`)**
-   - 고유 ID, 쇼핑몰 이름, 아이콘 코드/컬러, 공식 홈페이지(`homeUrl`), 종합몰 전용관 URL(`dedicatedZoneUrl`), 직접 검색 URL 템플릿(`searchUrlTemplate`), 쇼핑몰 유형(`전용몰` / `전용관` / `검토`), 공식 사용처 검증 상태, 마지막 검증일(`2026-10-27`), 데이터 연동 분류 및 결제 유의사항 완비
+   - 고유 ID, 쇼핑몰 이름, 아이콘 코드/컬러, 공식 홈페이지(`homeUrl`), 종합몰 전용관 URL(`dedicatedZoneUrl`), 직접 검색 URL 템플릿(`searchUrlTemplate`), 쇼핑몰 유형(`전용몰` / `전용관` / `검토`), 공식 사용처 검증 상태, 마지막 검증일, 데이터 연동 분류 및 결제 유의사항 완비
 2. **홈페이지 URL과 검색 URL의 엄격한 분리 및 전용관 타겟팅 (`src/utils/searchUrlBuilder.ts`)**
-   - 종합몰 내 전용관(11번가 온누리마켓, 롯데ON 온누리상생스토어, 우체국쇼핑, 공영홈쇼핑 온누리장터, 현대홈쇼핑 온누리샵)은 일반 종합몰 메인으로 이동하지 않고 **전용관 키워드가 결합된 검색 결과 URL** 및 전용관 진입 페이지로 연결
+   - 종합몰 내 전용관은 확인된 검색 URL 또는 전용관 진입 페이지로 연결하며, 온누리 대상 상품을 구분할 수 있는 공개 데이터가 확인된 몰만 상품 통합 검색에 포함
    - 고정 URL이 미확정이거나 사용처 재확인이 필요한 쇼핑몰(퍼스트복지몰 온누리, 드림온누리몰 등)은 임의의 추측 URL을 넣지 않고 외부 웹 검색으로 안전 연결
    - 모든 쇼핑몰 카드에 주 검색 링크 외에 구글 웹 검색·네이버 웹 검색 보조 링크 제공
 3. **통합 상품 검색 및 비교 엔진 (`src/services/productAdapter.ts`, `UnifiedProductComparisonSection.tsx`)**
@@ -134,24 +152,24 @@ npm test
 | :--- | :--- | :--- | :---: | :---: | :--- | :--- | :--- |
 | 1 | `onnuri-market-official` | **온누리시장** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://www.onnuri-mall.co.kr/` | 공개 API 미제공 · `site:onnuri-mall.co.kr` 도메인 지정 웹 검색 |
 | 2 | `onnuri-goodday` | **온누리굿데이** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://www.onnurigood.com/` | 쇼핑몰 내부 검색 URL 직접 연결 (`/goods/goods_search.php?keyword=`) |
-| 3 | `onnuri-juntong-sijang` | **온누리전통시장** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://www.onnuri-sijang.com/onnuri/main/pc` | 현대이지웰 운영 · `site:onnuri-sijang.com` 도메인 지정 웹 검색 |
+| 3 | `onnuri-juntong-sijang` | **온누리전통시장** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://www.onnuri-sijang.com/onnuri/main/pc` | 내부 상품 검색으로 연결 · 상품별 결제 가능 여부 필드 미확인 |
 | 4 | `inthemarket-onnuri` | **인더마켓온누리몰** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://www.inthemarket.co.kr/` | 쇼핑몰 내부 검색 URL 직접 연결 (`/goods/goods_search.php?keyword=`) |
 | 5 | `onnuri-market-nuri` | **온누리마켓** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://nurimarket.co.kr/` | 공개 API 미제공 · `site:nurimarket.co.kr` 도메인 지정 웹 검색 |
-| 6 | `noljang` | **놀장** | 전용몰 | 앱 중심 (2026-10) | 2. 검색 링크 연결 | `https://mall.noljang.co.kr/` | 전통시장 플랫폼 · `site:mall.noljang.co.kr` 도메인 지정 웹 검색 |
+| 6 | `noljang` | **놀장** | 전용몰 | 검증완료 (2026-10-28) | 로컬 공개 검색 | `https://mall.noljang.co.kr/` | 공개 검색 API의 `onuriYn=Y` 상품만 수집 |
 | 7 | `onnuri-shopping` | **온누리쇼핑** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | 미확정 (`null`) | 단일 도메인 미확정 · `"온누리쇼핑" + 검색어` 외부 웹 검색 연결 |
 | 8 | `lotteon-onnuri` | **롯데ON 온누리상생스토어** | 전용관 | 검증완료 (2026-10) | 1. 공식 API/제휴 가능 | 전용관 검색 진입 URL | 롯데ON 내 `"온누리상생스토어 + 검색어"` 전용관 검색 직접 연결 |
 | 9 | `sijang-to-room` | **시장을방으로** | 전용몰 | 앱 중심 (2026-10) | 2. 검색 링크 연결 | 모바일 앱 중심 (`null`) | 웹 고정 상품 검색 URL 미제공 · 외부 키워드 웹 검색 연결 |
 | 10 | `onnuri-chance` | **온누리찬스** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://onnurichance.com/` | 공개 API 미제공 · `site:onnurichance.com` 도메인 지정 웹 검색 |
-| 11 | `gyeongbuk-cyso` | **경북고향장터 사이소** | 전용관 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://www.cyso.co.kr/` | 경북 농특산물몰 · `site:cyso.co.kr` 도메인 지정 웹 검색 |
+| 11 | `gyeongbuk-cyso` | **경북고향장터 사이소** | 전용관 | 검증완료 (2026-10) | 1. 공개 검색 통합 | `https://www.cyso.co.kr/exhibition/detail?id=1773379812` | 온누리상품권 기획전의 판매 중 상품을 상품명으로 검색 |
 | 12 | `11st-onnuri` | **11번가 온누리마켓** | 전용관 | 검증완료 (2026-10) | 1. 공식 API/제휴 가능 | 전용관 검색 진입 URL | 11번가 Open API 보유 · 현재 `"온누리마켓 + 검색어"` 전용관 직접 연결 |
 | 13 | `onnuri-hotdeal` | **온누리핫딜** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://onnurideal.com/` | 공개 API 미제공 · `site:onnurideal.com` 도메인 지정 웹 검색 |
 | 14 | `first-welfare-onnuri` | **퍼스트복지몰 온누리** | 검토 | **재확인 필요** | 3. 제휴/확인 필요 | 미확정 (`null`) | 폐쇄형 복지몰 여부 및 현행 사용처 재확인 필요 · 외부 웹 검색 연결 |
 | 15 | `dream-onnuri-mall` | **드림온누리몰** | 검토 | **재확인 필요** | 3. 제휴/확인 필요 | 미확정 (`null`) | 현행 사용처 유지 여부 및 도메인 재확인 필요 · 외부 웹 검색 연결 |
 | 16 | `onnuri-gonggong-mall` | **온누리공공몰** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://www.ongong.kr/shop/` | 공개 API 미제공 · `site:ongong.kr` 도메인 지정 웹 검색 |
 | 17 | `epost-shopping-onnuri` | **우체국쇼핑** | 전용관 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://mall.epost.go.kr/` | 우체국쇼핑 내 `"온누리 + 검색어"` 조합 내부 검색 직접 연결 |
-| 18 | `onnuri-5iljang` | **온누리5일장** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://onnuri5.com/` | 공개 API 미제공 · `site:onnuri5.com` 도메인 지정 웹 검색 |
-| 19 | `onnuri-paldo-sijang` | **온누리팔도시장** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | 미확정 (`null`) | `"온누리팔도시장" + 검색어` 외부 웹 검색 연결 |
-| 20 | `gongyoung-onnuri` | **공영홈쇼핑 온누리장터** | 전용관 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://www.gongyoungshop.kr/` | 공영쇼핑 내 `"온누리 + 검색어"` 조합 내부 검색 직접 연결 |
+| 18 | `onnuri-5iljang` | **온누리5일장** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://www.onnuri5.co.kr/` | 내부 상품명 검색 결과가 없어 공식 도메인 지정 웹 검색 |
+| 19 | `onnuri-paldo-sijang` | **온누리팔도시장** | 전용몰 | 검증완료 (2026-10) | 1. 공개 검색 통합 | `https://www.e-jangter.com/Extmall/Onnuri.aspx` | 온누리 팔도시장 카테고리 필터 검색 결과 수집 |
+| 20 | `gongyoung-onnuri` | **공영홈쇼핑 온누리장터** | 전용관 | 검증완료 (2026-10) | 1. 공개 검색 통합 | `https://www.gongyoungshop.kr/` | 상품 카드 응답의 온누리 표시와 판매 상태를 확인해 통합 |
 | 21 | `kkuk-ai-onnuri` | **꾹AI:온누리몰** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://onnuri.ai/` | 공개 API 미제공 · `site:onnuri.ai` 도메인 지정 웹 검색 |
 | 22 | `genius-mall` | **지니어스 Mall** | 전용몰 | 검증완료 (2026-10) | 2. 검색 링크 연결 | `https://luxurysystem.co.kr/` | 공개 API 미제공 · `site:luxurysystem.co.kr` 도메인 지정 웹 검색 |
 | 23 | `hyundai-hmall-onnuri` | **현대홈쇼핑 온누리샵** | 전용관 | 검증완료 (2026-10) | 2. 검색 링크 연결 | 전용관 검색 진입 URL | 현대Hmall 내 `"온누리샵 + 검색어"` 전용관 검색 직접 연결 |
@@ -161,9 +179,9 @@ npm test
 
 ## 6. 앞으로 실제 상품 통합 검색을 완성하는 데 필요한 작업
 
-1. **백엔드 오픈API 프록시 서버 구축 (`VITE_ONNURI_API_PROXY_URL` 연결)**
-   - 프런트엔드의 `OfficialApiProxyAdapter`(`src/services/productAdapter.ts`)는 이미 `/api/onnuri/products?q=검색어` 형태의 표준 JSON 응답을 받아 렌더링하도록 구현되어 있습니다.
-   - Vercel Serverless Functions 또는 Node.js(Express/Fastify) 서버에서 11번가 Open API 키 등을 환경변수로 안전하게 관리하고, 온누리 전용관 상품만 필터링하여 반환하도록 연결하면 즉시 실시간 가격 비교가 작동합니다.
+1. **시범 상품 피드 연결 (`VITE_ONNURI_API_PROXY_URL` 연결)**
+   - `/api/onnuri/products?q=검색어` 서버 검색 경로와 최대 3곳의 제휴 JSON 피드 어댑터가 준비되어 있습니다.
+   - 각 쇼핑몰과 데이터 제공 범위 및 `onnuriEligible` 필드를 협의한 뒤 `ONNURI_FEEDS_JSON`을 설정해야 실제 상품 검색이 작동합니다.
 2. **온누리 전용몰 상품 EP(피드) 제휴**
    - 온누리굿데이, 인더마켓온누리몰, 온누리시장 등 고도몰·카페24 기반 전용몰 운영사와 협의하여 일일 상품 피드(JSON/XML)를 제공받아 배치 색인(예: Supabase / PostgreSQL / Elasticsearch)을 구성합니다.
 3. **공식 사용처 정기 검증 자동화**
