@@ -54,7 +54,7 @@ export const HeroSearchSection: React.FC<HeroSearchSectionProps> = ({
               </div>
             </div>
           )}
-          {showAdNotice && <p className="mt-2 text-xs text-onnuri-soft">검색결과 확인 전 광고 시청 여부를 선택할 수 있어요.</p>}
+          {/*{showAdNotice && <p className="mt-2 text-xs text-onnuri-soft">검색결과 확인 전 광고 시청 여부를 선택할 수 있어요.</p>}*/}
           <div className="mt-3 flex flex-wrap items-center gap-x-4">
           <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 text-sm font-medium text-onnuri-soft">
             <input type="checkbox" checked={searchFavoritesOnly} onChange={(event) => onSearchFavoritesOnlyChange(event.target.checked)} className="h-4 w-4 accent-onnuri-green" />

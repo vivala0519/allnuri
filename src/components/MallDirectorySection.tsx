@@ -67,7 +67,7 @@ export const MallDirectorySection: React.FC<MallDirectorySectionProps> = ({
             id="malls-title"
             className="text-[22px] sm:text-[28px] font-bold tracking-tight text-onnuri-ink"
           >
-            쇼핑몰 모아보기
+            디지털 온누리 쇼핑몰 리스트
           </h2>
           <button
             type="button"

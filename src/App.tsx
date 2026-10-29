@@ -243,7 +243,7 @@ export function App() {
   // 쇼핑몰 필터링
   const filteredMalls = useMemo(() => {
     const nameTerm = mallNameQuery.trim().toLowerCase();
-    return ONNURI_MALLS.filter((mall) => {
+    const matchingMalls = ONNURI_MALLS.filter((mall) => {
       if (categoryFilter !== 'all' && mall.mallType !== categoryFilter) {
         return false;
       }
@@ -277,6 +277,12 @@ export function App() {
       }
       return true;
     });
+    if (categoryFilter !== 'all') return matchingMalls;
+
+    const categoryOrder: Record<string, number> = { 전용몰: 0, 전용관: 1, 검토: 2 };
+    return matchingMalls.sort(
+      (a, b) => (categoryOrder[a.mallType] ?? Number.MAX_SAFE_INTEGER) - (categoryOrder[b.mallType] ?? Number.MAX_SAFE_INTEGER),
+    );
   }, [
     categoryFilter,
     selectedMallId,
