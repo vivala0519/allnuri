@@ -125,66 +125,66 @@ export const MallDirectorySection: React.FC<MallDirectorySectionProps> = ({
         </div>
 
         {/* 2행: 연동 방식별 필터 + 특정 쇼핑몰 선택 + 쇼핑몰 이름 검색 */}
-        <details className="pt-3 border-t border-onnuri-line/70">
-          <summary className="cursor-pointer min-h-11 flex items-center text-sm font-bold text-onnuri-soft">상세 필터</summary>
-          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {/* 연동/검색 방식 필터 */}
-          {/*<div className="flex items-center gap-2">*/}
-          {/*  <Filter className="w-4 h-4 text-onnuri-green flex-shrink-0" aria-hidden="true" />*/}
-          {/*  <label htmlFor="methodFilterSelect" className="sr-only">*/}
-          {/*    데이터 연동 방식 필터*/}
-          {/*  </label>*/}
-          {/*  <select*/}
-          {/*    id="methodFilterSelect"*/}
-          {/*    value={methodFilter}*/}
-          {/*    onChange={(e) => onMethodFilterChange(e.target.value as MethodFilter)}*/}
-          {/*    className="w-full text-sm font-medium text-onnuri-ink bg-onnuri-cream/70 border border-[#dce4dd] rounded-xl px-3 min-h-12 py-2.5 focus:outline-none focus:border-onnuri-green"*/}
-          {/*  >*/}
-          {/*    <option value="all">연동 방식: 전체 보기</option>*/}
-          {/*    <option value="direct_or_zone">직접/전용관 검색 URL 보유 몰</option>*/}
-          {/*    <option value="domain_verified">공식 도메인/전용관 확인 몰</option>*/}
-          {/*    <option value="api_supported">공식 Open API/제휴 가능 몰</option>*/}
-          {/*  </select>*/}
-          {/*</div>*/}
+        {/*<details className="pt-3 border-t border-onnuri-line/70">*/}
+        {/*  <summary className="cursor-pointer min-h-11 flex items-center text-sm font-bold text-onnuri-soft">상세 필터</summary>*/}
+        {/*  <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">*/}
+        {/*  /!* 연동/검색 방식 필터 *!/*/}
+        {/*  /!*<div className="flex items-center gap-2">*!/*/}
+        {/*  /!*  <Filter className="w-4 h-4 text-onnuri-green flex-shrink-0" aria-hidden="true" />*!/*/}
+        {/*  /!*  <label htmlFor="methodFilterSelect" className="sr-only">*!/*/}
+        {/*  /!*    데이터 연동 방식 필터*!/*/}
+        {/*  /!*  </label>*!/*/}
+        {/*  /!*  <select*!/*/}
+        {/*  /!*    id="methodFilterSelect"*!/*/}
+        {/*  /!*    value={methodFilter}*!/*/}
+        {/*  /!*    onChange={(e) => onMethodFilterChange(e.target.value as MethodFilter)}*!/*/}
+        {/*  /!*    className="w-full text-sm font-medium text-onnuri-ink bg-onnuri-cream/70 border border-[#dce4dd] rounded-xl px-3 min-h-12 py-2.5 focus:outline-none focus:border-onnuri-green"*!/*/}
+        {/*  /!*  >*!/*/}
+        {/*  /!*    <option value="all">연동 방식: 전체 보기</option>*!/*/}
+        {/*  /!*    <option value="direct_or_zone">직접/전용관 검색 URL 보유 몰</option>*!/*/}
+        {/*  /!*    <option value="domain_verified">공식 도메인/전용관 확인 몰</option>*!/*/}
+        {/*  /!*    <option value="api_supported">공식 Open API/제휴 가능 몰</option>*!/*/}
+        {/*  /!*  </select>*!/*/}
+        {/*  /!*</div>*!/*/}
 
-          {/* 특정 쇼핑몰 선택 필터 */}
-          <div>
-            <label htmlFor="mallSelectFilter" className="sr-only">
-              특정 쇼핑몰 선택
-            </label>
-            <select
-              id="mallSelectFilter"
-              value={selectedMallId}
-              onChange={(e) => onSelectedMallIdChange(e.target.value)}
-              className="w-full text-sm font-medium text-onnuri-ink bg-onnuri-cream/70 border border-[#dce4dd] rounded-xl px-3 min-h-12 py-2.5 focus:outline-none focus:border-onnuri-green"
-            >
-              <option value="all">쇼핑몰 선택: 전체 ({visibleMalls.length}곳)</option>
-              {visibleMalls.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name} ({m.mallType})
-                </option>
-              ))}
-            </select>
-          </div>
+        {/*  /!* 특정 쇼핑몰 선택 필터 *!/*/}
+        {/*  <div>*/}
+        {/*    <label htmlFor="mallSelectFilter" className="sr-only">*/}
+        {/*      특정 쇼핑몰 선택*/}
+        {/*    </label>*/}
+        {/*    <select*/}
+        {/*      id="mallSelectFilter"*/}
+        {/*      value={selectedMallId}*/}
+        {/*      onChange={(e) => onSelectedMallIdChange(e.target.value)}*/}
+        {/*      className="w-full text-sm font-medium text-onnuri-ink bg-onnuri-cream/70 border border-[#dce4dd] rounded-xl px-3 min-h-12 py-2.5 focus:outline-none focus:border-onnuri-green"*/}
+        {/*    >*/}
+        {/*      <option value="all">쇼핑몰 선택: 전체 ({visibleMalls.length}곳)</option>*/}
+        {/*      {visibleMalls.map((m) => (*/}
+        {/*        <option key={m.id} value={m.id}>*/}
+        {/*          {m.name} ({m.mallType})*/}
+        {/*        </option>*/}
+        {/*      ))}*/}
+        {/*    </select>*/}
+        {/*  </div>*/}
 
-          {/* 쇼핑몰 이름 검색 */}
-          <div className="relative flex items-center">
-            <Search
-              className="w-4 h-4 text-[#7c8a81] absolute left-3 pointer-events-none"
-              aria-hidden="true"
-            />
-            <input
-              id="mallFilter"
-              type="search"
-              value={mallNameQuery}
-              onChange={(e) => onMallNameQueryChange(e.target.value)}
-              placeholder="쇼핑몰 이름 또는 품목 검색 (예: 11번가, 수산)"
-              aria-label="쇼핑몰 이름 검색"
-              className="w-full text-sm font-medium text-onnuri-ink bg-white border border-[#dce4dd] rounded-xl pl-9 pr-3 min-h-12 py-2.5 focus:outline-none focus:border-onnuri-green"
-            />
-          </div>
-          </div>
-        </details>
+        {/*  /!* 쇼핑몰 이름 검색 *!/*/}
+        {/*  <div className="relative flex items-center">*/}
+        {/*    <Search*/}
+        {/*      className="w-4 h-4 text-[#7c8a81] absolute left-3 pointer-events-none"*/}
+        {/*      aria-hidden="true"*/}
+        {/*    />*/}
+        {/*    <input*/}
+        {/*      id="mallFilter"*/}
+        {/*      type="search"*/}
+        {/*      value={mallNameQuery}*/}
+        {/*      onChange={(e) => onMallNameQueryChange(e.target.value)}*/}
+        {/*      placeholder="쇼핑몰 이름 또는 품목 검색 (예: 11번가, 수산)"*/}
+        {/*      aria-label="쇼핑몰 이름 검색"*/}
+        {/*      className="w-full text-sm font-medium text-onnuri-ink bg-white border border-[#dce4dd] rounded-xl pl-9 pr-3 min-h-12 py-2.5 focus:outline-none focus:border-onnuri-green"*/}
+        {/*    />*/}
+        {/*  </div>*/}
+        {/*  </div>*/}
+        {/*</details>*/}
       </div>
 
       {/* 검색 결과 요약 바 */}
