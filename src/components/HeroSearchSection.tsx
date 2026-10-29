@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
-import { Check, Clock, Search, Share2, X } from 'lucide-react';
-import { isTossBuild } from '../utils/toss';
+import React from 'react';
+import { Clock, Search, X } from 'lucide-react';
 
 interface HeroSearchSectionProps {
   query: string;
@@ -13,16 +12,8 @@ interface HeroSearchSectionProps {
 }
 
 export const HeroSearchSection: React.FC<HeroSearchSectionProps> = ({
-  query, onQueryChange, onSubmitSearch, recentQueries, onRemoveRecentQuery, onClearRecentQueries, onShareSearchUrl,
+  query, onQueryChange, onSubmitSearch, recentQueries, onRemoveRecentQuery, onClearRecentQueries,
 }) => {
-  const [copied, setCopied] = useState(false);
-  const share = async () => {
-    if (await onShareSearchUrl()) {
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2200);
-    }
-  };
-
   return (
     <section id="search-section" aria-labelledby="hero-title" className="hero-search bg-white">
       <div className="max-w-[1140px] mx-auto px-5 sm:px-6 pt-10 pb-8 sm:pt-20 sm:pb-14">

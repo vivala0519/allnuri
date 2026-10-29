@@ -1,5 +1,5 @@
 import React from 'react';
-import { RotateCcw, Search } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import { MallKind, OnnuriMall } from '../types/onnuri';
 import { MallCard } from './MallCard';
 
@@ -35,10 +35,6 @@ export const MallDirectorySection: React.FC<MallDirectorySectionProps> = ({
   keyword,
   categoryFilter,
   onCategoryFilterChange,
-  mallNameQuery,
-  onMallNameQueryChange,
-  selectedMallId,
-  onSelectedMallIdChange,
   favOnly,
   onFavOnlyChange,
   favorites,
