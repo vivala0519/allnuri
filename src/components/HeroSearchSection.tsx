@@ -17,7 +17,6 @@ interface HeroSearchSectionProps {
 }
 
 export const HeroSearchSection: React.FC<HeroSearchSectionProps> = ({
-  showAdNotice,
   searchFavoritesOnly, onSearchFavoritesOnlyChange, favoriteCount, onGoToFavorites,
   query, onQueryChange, onSubmitSearch, recentQueries, onRemoveRecentQuery, onClearRecentQueries,
 }) => {
