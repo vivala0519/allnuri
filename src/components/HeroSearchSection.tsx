@@ -2,6 +2,10 @@ import React from 'react';
 import { Clock, Search, X } from 'lucide-react';
 
 interface HeroSearchSectionProps {
+  searchFavoritesOnly: boolean;
+  onSearchFavoritesOnlyChange: (value: boolean) => void;
+  favoriteCount: number;
+  onGoToFavorites: () => void;
   query: string;
   onQueryChange: (value: string) => void;
   onSubmitSearch: (value: string) => void;
@@ -12,6 +16,7 @@ interface HeroSearchSectionProps {
 }
 
 export const HeroSearchSection: React.FC<HeroSearchSectionProps> = ({
+  searchFavoritesOnly, onSearchFavoritesOnlyChange, favoriteCount, onGoToFavorites,
   query, onQueryChange, onSubmitSearch, recentQueries, onRemoveRecentQuery, onClearRecentQueries,
 }) => {
   return (
@@ -29,6 +34,14 @@ export const HeroSearchSection: React.FC<HeroSearchSectionProps> = ({
             <input id="main-search" type="search" value={query} onChange={(event) => onQueryChange(event.target.value)} placeholder="어떤 상품을 찾으세요?" className="min-w-0 flex-1 h-12 px-1 bg-transparent text-base text-onnuri-ink placeholder:text-[#8b95a1] outline-none" />
             <button type="submit" className="h-12 px-5 sm:px-8 rounded-2xl bg-onnuri-green text-white font-bold hover:bg-onnuri-greenDark transition-colors">검색</button>
           </form>
+          <div className="mt-3 flex flex-wrap items-center gap-x-4">
+          <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 text-sm font-medium text-onnuri-soft">
+            <input type="checkbox" checked={searchFavoritesOnly} onChange={(event) => onSearchFavoritesOnlyChange(event.target.checked)} className="h-4 w-4 accent-onnuri-green" />
+            즐겨찾기한 쇼핑몰에서만 검색 ({favoriteCount})
+          </label>
+          <button type="button" onClick={onGoToFavorites} className="min-h-11 text-sm font-semibold text-onnuri-greenDark underline underline-offset-4">즐겨찾기 하러 가기</button>
+          </div>
+          {searchFavoritesOnly && favoriteCount === 0 && <p role="status" className="text-sm text-onnuri-soft">아래 쇼핑몰 목록에서 하트를 눌러 즐겨찾기를 추가해 주세요.</p>}
           {/*<div className="mt-4 flex flex-wrap items-center gap-2 text-sm">*/}
           {/*  <span className="text-[#77877c] mr-1">추천</span>*/}
           {/*  {RECOMMENDED_KEYWORDS.slice(0, 5).map((word) => <button key={word} type="button" onClick={() => onSubmitSearch(word)} className="px-3 py-1.5 rounded-full bg-white border border-[#e1ebe3] text-[#53675a] hover:border-onnuri-green hover:text-onnuri-green transition-colors">{word}</button>)}*/}

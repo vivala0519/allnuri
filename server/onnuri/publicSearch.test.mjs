@@ -3,6 +3,19 @@ import assert from 'node:assert/strict';
 import { parseChanceResults, parseCysoResults, parseGongyoungResults, parseHotdealResults, parseNoljangResults, parsePublicResults, searchPublicMalls } from './publicSearch.mjs';
 
 const mall = { mallId: 'onnuri-goodday', name: '온누리굿데이', origin: 'https://www.onnurigood.com' };
+test('즐겨찾기가 없으면 쇼핑몰에 요청하지 않는다', async () => {
+  let calls = 0;
+  const result = await searchPublicMalls('favorites-empty', async () => { calls++; throw new Error('unexpected request'); }, []);
+  assert.equal(calls, 0);
+  assert.deepEqual(result, { items: [], sources: [] });
+});
+
+test('지정한 즐겨찾기 쇼핑몰만 조회한다', async () => {
+  let calls = 0;
+  const result = await searchPublicMalls('favorites-scope-test', async () => { calls++; throw new Error('offline'); }, ['onnuri-goodday']);
+  assert.equal(calls, 1);
+  assert.deepEqual(result.sources.map((source) => source.mallId), ['onnuri-goodday']);
+});
 const searchPage = (html, query = '쌀') => `<div class="search_form"><form class="form_box"><input name="pn" value="product.search.list"><input name="search_word" value="${query}"></form></div><div class="result_item"><div id="total_cnt">${html}</div></div>`;
 const card = (badge, extra = '') => `<div class="item_box ${extra}" data-pcode="A1">
   <div class="thumb"><img src="/rice.jpg"></div>

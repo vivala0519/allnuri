@@ -664,8 +664,8 @@ function buildSearchUrl(mall, query) {
   return `${mall.origin}/?pn=product.search.list&search_word=${encodeURIComponent(query)}`;
 }
 
-export async function searchPublicMalls(query, fetchImpl = fetch) {
-  const results = await Promise.all(MALLS.map(async (mall) => {
+export async function searchPublicMalls(query, fetchImpl = fetch, mallIds) {
+  const results = await Promise.all(MALLS.filter((mall) => !mallIds || mallIds.includes(mall.mallId)).map(async (mall) => {
     try {
       const url = buildSearchUrl(mall, query);
       const key = `${mall.mallId}:${query}`;

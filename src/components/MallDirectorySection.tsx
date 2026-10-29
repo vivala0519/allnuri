@@ -1,5 +1,5 @@
 import React from 'react';
-import { RotateCcw } from 'lucide-react';
+import { ChevronDown, RotateCcw } from 'lucide-react';
 import { MallKind, OnnuriMall } from '../types/onnuri';
 import { MallCard } from './MallCard';
 
@@ -27,6 +27,8 @@ interface MallDirectorySectionProps {
   favorites: string[];
   onToggleFavorite: (mallName: string) => void;
   onResetFilters: () => void;
+  isExpanded: boolean;
+  onExpandedChange: (expanded: boolean) => void;
 }
 
 export const MallDirectorySection: React.FC<MallDirectorySectionProps> = ({
@@ -40,6 +42,8 @@ export const MallDirectorySection: React.FC<MallDirectorySectionProps> = ({
   favorites,
   onToggleFavorite,
   onResetFilters,
+  isExpanded,
+  onExpandedChange,
 }) => {
   const isVisibleMall = (mall: OnnuriMall) => mall.mallType !== '검토' && mall.id !== 'sijang-to-room';
   const visibleMalls = malls.filter(isVisibleMall);
@@ -57,21 +61,31 @@ export const MallDirectorySection: React.FC<MallDirectorySectionProps> = ({
       className="mall-directory py-8 sm:py-12 max-w-[1140px] mx-auto px-4 sm:px-6"
     >
       {/* 섹션 헤더 */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
-        <div>
+      <div className="mb-5">
+        <div className="flex items-center gap-2">
           <h2
             id="malls-title"
             className="text-[22px] sm:text-[28px] font-bold tracking-tight text-onnuri-ink"
           >
-            온라인 쇼핑몰 모아보기
+            쇼핑몰 모아보기
           </h2>
+          <button
+            type="button"
+            aria-expanded={isExpanded}
+            aria-controls="mall-directory-content"
+            onClick={() => onExpandedChange(!isExpanded)}
+            className="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-xl px-2.5 text-sm font-semibold text-onnuri-soft hover:bg-onnuri-cream"
+          >
+            {isExpanded ? '접기' : '펼치기'}
+            <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} aria-hidden="true" />
+          </button>
+        </div>
           <p className="text-sm text-onnuri-soft mt-2 leading-relaxed">
             결제 전, 온누리상품권 결제 가능 표시 상품을 확인하세요
           </p>
-        </div>
-
       </div>
 
+      <div id="mall-directory-content" hidden={!isExpanded}>
       {/* 필터 및 검색 컨트롤 영역 */}
       <div className="bg-onnuri-cream rounded-[24px] p-4 sm:p-5 mb-4 space-y-4">
         {/* 1행: 쇼핑몰 유형 탭 */}
@@ -230,6 +244,7 @@ export const MallDirectorySection: React.FC<MallDirectorySectionProps> = ({
           </button>
         </div>
       )}
+      </div>
     </section>
   );
 };

@@ -165,15 +165,16 @@ export class OfficialApiProxyAdapter implements ProductSearchAdapter {
     return Boolean(this.proxyEndpoint);
   }
 
-  async searchProducts(query: string): Promise<AdapterSearchResponse[]> {
+  async searchProducts(query: string, mallIds?: string[]): Promise<AdapterSearchResponse[]> {
     const now = new Date().toISOString();
-    if (!this.proxyEndpoint || !query.trim()) {
+    if (!this.proxyEndpoint || !query.trim() || mallIds?.length === 0) {
       return [];
     }
 
     try {
       const url = new URL(this.proxyEndpoint, window.location.origin);
       url.searchParams.set('q', query);
+      if (mallIds) url.searchParams.set('malls', mallIds.join(','));
       const response = await fetch(url.toString(), {
         method: 'GET',
         headers: { Accept: 'application/json' },
@@ -234,19 +235,21 @@ export class OfficialApiProxyAdapter implements ProductSearchAdapter {
 export async function executeUnifiedSearch(
   query: string,
   customItems: UnifiedProduct[] = [],
-  customProxyUrl?: string
+  customProxyUrl?: string,
+  mallIds?: string[]
 ): Promise<{
   products: UnifiedProduct[];
   adapterResponses: AdapterSearchResponse[];
 }> {
   const trimmed = query.trim();
   const proxyAdapter = new OfficialApiProxyAdapter(customProxyUrl);
-  const apiResponses = await proxyAdapter.searchProducts(trimmed);
+  const apiResponses = (await proxyAdapter.searchProducts(trimmed, mallIds))
+    .filter((response) => !mallIds || mallIds.includes(response.mallId));
   const now = new Date().toISOString();
 
   const apiMallIds = new Set(apiResponses.map((r) => r.mallId));
   const linkResponses: AdapterSearchResponse[] = ONNURI_MALLS.filter(
-    (m) => !apiMallIds.has(m.id)
+    (m) => !apiMallIds.has(m.id) && (!mallIds || mallIds.includes(m.id))
   ).map((mall) => ({
     mallId: mall.id,
     mallName: mall.name,
@@ -260,7 +263,7 @@ export async function executeUnifiedSearch(
   const allResponses = [...apiResponses, ...linkResponses];
 
   // 사용자가 직접 업로드/연결한 검증된 실제 상품 피드 데이터 필터링
-  const matchedCustomProducts = customItems.filter((item) => matchesSearchQuery(item.title, trimmed));
+  const matchedCustomProducts = customItems.filter((item) => matchesSearchQuery(item.title, trimmed) && (!mallIds || mallIds.includes(item.mallId)));
 
   const apiProducts = apiResponses.flatMap((r) => r.products);
   return {

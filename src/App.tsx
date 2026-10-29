@@ -53,6 +53,11 @@ export function App() {
   );
 
   const [favorites, setFavorites] = useState<string[]>(() => loadFavoriteMalls());
+  const [searchFavoritesOnly, setSearchFavoritesOnly] = useState(false);
+  const [mallDirectoryExpanded, setMallDirectoryExpanded] = useState(true);
+  const searchMallIds = useMemo(() => searchFavoritesOnly
+    ? ONNURI_MALLS.filter((mall) => favorites.includes(mall.name)).map((mall) => mall.id)
+    : undefined, [searchFavoritesOnly, favorites]);
   const [recentQueries, setRecentQueries] = useState<string[]>(() =>
     loadRecentQueries()
   );
@@ -88,7 +93,7 @@ export function App() {
     setIsLoadingProducts(true);
     setProductError(null);
 
-    executeUnifiedSearch(committedQuery, customProducts, customProxyUrl)
+    executeUnifiedSearch(committedQuery, customProducts, customProxyUrl, searchMallIds)
       .then((res) => {
         if (cancelled) return;
         setProducts(res.products);
@@ -106,7 +111,7 @@ export function App() {
     return () => {
       cancelled = true;
     };
-  }, [committedQuery, customProducts, customProxyUrl]);
+  }, [committedQuery, customProducts, customProxyUrl, searchMallIds]);
 
   // 검색 실행 핸들러
   const handleSubmitSearch = useCallback((rawValue: string) => {
@@ -226,13 +231,23 @@ export function App() {
       {!isTossBuild && <Header
         favoriteCount={favorites.length}
         favOnly={favOnly}
-        onToggleFavOnly={() => setFavOnly((prev) => !prev)}
+        onToggleFavOnly={() => {
+          setFavOnly((prev) => !prev);
+          setMallDirectoryExpanded(true);
+        }}
       />}
 
       {/* 메인 콘텐츠 */}
       <main className="flex-1">
         {/* 2 & 3. 통합 상품 검색 영역 + 추천/최근 검색어 */}
         <HeroSearchSection
+          searchFavoritesOnly={searchFavoritesOnly}
+          onSearchFavoritesOnlyChange={setSearchFavoritesOnly}
+          favoriteCount={favorites.length}
+          onGoToFavorites={() => {
+            setMallDirectoryExpanded(true);
+            window.setTimeout(() => document.getElementById('malls-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0);
+          }}
           query={queryInput}
           onQueryChange={setQueryInput}
           onSubmitSearch={handleSubmitSearch}
@@ -274,6 +289,8 @@ export function App() {
           favorites={favorites}
           onToggleFavorite={handleToggleFavorite}
           onResetFilters={handleResetFilters}
+          isExpanded={mallDirectoryExpanded}
+          onExpandedChange={setMallDirectoryExpanded}
         />
 
         {/* 쇼핑몰별 데이터 연동 상태표 */}

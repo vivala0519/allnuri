@@ -1,10 +1,10 @@
 import { readFeedConfig, searchPartnerFeeds } from './feedCore.mjs';
 import { searchPublicMalls } from './publicSearch.mjs';
 
-export async function searchLocalProducts(query, fetchImpl = fetch) {
+export async function searchLocalProducts(query, fetchImpl = fetch, mallIds) {
   const [feeds, publicResults] = await Promise.all([
-    searchPartnerFeeds(query, readFeedConfig(), fetchImpl),
-    searchPublicMalls(query, fetchImpl),
+    searchPartnerFeeds(query, readFeedConfig().filter((feed) => !mallIds || mallIds.includes(feed.mallId)), fetchImpl),
+    searchPublicMalls(query, fetchImpl, mallIds),
   ]);
   return {
     items: [...publicResults.items, ...feeds.items],
@@ -29,7 +29,8 @@ export async function handleLocalSearch(request, response) {
     return;
   }
   try {
-    response.end(JSON.stringify(await searchLocalProducts(query)));
+    const mallIds = url.searchParams.has('malls') ? url.searchParams.get('malls').split(',').filter(Boolean) : undefined;
+    response.end(JSON.stringify(await searchLocalProducts(query, fetch, mallIds)));
   } catch {
     response.statusCode = 500;
     response.end(JSON.stringify({ error: 'Search configuration is invalid' }));
