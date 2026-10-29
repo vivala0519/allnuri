@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ONNURI_MALLS } from './data/malls';
 import { AdapterSearchResponse, UnifiedProduct } from './types/onnuri';
 import { executeUnifiedSearch } from './services/productAdapter';
@@ -23,9 +23,13 @@ import { UsageGuideSection } from './components/UsageGuideSection';
 import { Footer } from './components/Footer';
 import { initializeTossIdentity, isTossBuild, openTossExternalLink, shareTossSearch } from './utils/toss';
 import { useInterstitialAd } from './hooks/useInterstitialAd';
+import { SearchAdConfirmation } from './components/SearchAdConfirmation';
+import { ScrollToTop } from './components/ScrollToTop';
+import { nextSearchAdSchedule, normalizeAdSearchQuery } from './utils/searchAdSchedule';
 
 export function App() {
   const interstitialAd = useInterstitialAd();
+  const [pendingAdSearch, setPendingAdSearch] = useState<string | null>(null);
   const [platformError, setPlatformError] = useState<string | null>(null);
   useEffect(() => {
     initializeTossIdentity().catch(() => setPlatformError('사용자 정보를 확인하지 못했어요. 토스 앱에서 다시 열어 주세요.'));
@@ -36,6 +40,7 @@ export function App() {
     []
   );
   const initialQuery = initialParams.get('q')?.trim() || '';
+  const adSchedule = useRef({ lastQuery: normalizeAdSearchQuery(initialQuery), searchCount: 0 });
   const initialCategory = (initialParams.get('category') as CategoryFilter) || 'all';
   const validInitialCategory: CategoryFilter = ['all', '전용몰', '전용관'].includes(
     initialCategory
@@ -71,6 +76,8 @@ export function App() {
   const [productError, setProductError] = useState<string | null>(null);
   const [customProducts, setCustomProducts] = useState<UnifiedProduct[]>([]);
   const [customProxyUrl, setCustomProxyUrl] = useState<string>('');
+  const [searchRevision, setSearchRevision] = useState(0);
+  const searchGeneration = useRef(0);
 
   // URL 쿼리 파라미터 동기화 (검색어 공유 기능)
   useEffect(() => {
@@ -92,18 +99,19 @@ export function App() {
   // 통합 상품 검색 어댑터 실행
   useEffect(() => {
     let cancelled = false;
+    const generation = ++searchGeneration.current;
     setIsLoadingProducts(true);
     setProductError(null);
 
     executeUnifiedSearch(committedQuery, customProducts, customProxyUrl, searchMallIds)
       .then((res) => {
-        if (cancelled) return;
+        if (cancelled || generation !== searchGeneration.current) return;
         setProducts(res.products);
         setAdapterResponses(res.adapterResponses);
         setIsLoadingProducts(false);
       })
       .catch((err) => {
-        if (cancelled) return;
+        if (cancelled || generation !== searchGeneration.current) return;
         setProductError(
           err instanceof Error ? err.message : '상품 검색 중 오류가 발생했습니다.'
         );
@@ -113,18 +121,49 @@ export function App() {
     return () => {
       cancelled = true;
     };
-  }, [committedQuery, customProducts, customProxyUrl, searchMallIds]);
+  }, [committedQuery, customProducts, customProxyUrl, searchMallIds, searchRevision]);
 
   // 검색 실행 핸들러
-  const handleSubmitSearch = useCallback((rawValue: string) => {
+  const commitSearch = useCallback((rawValue: string) => {
     const trimmed = rawValue.trim();
+    adSchedule.current = nextSearchAdSchedule(adSchedule.current, trimmed).schedule;
     setQueryInput(trimmed);
     setCommittedQuery(trimmed);
+    setSearchRevision((revision) => revision + 1);
     if (trimmed) {
       setRecentQueries((prev) => addRecentQuery(trimmed, prev));
-      interstitialAd.onSearch();
     }
-  }, [interstitialAd.onSearch]);
+  }, []);
+
+  const handleSubmitSearch = useCallback((rawValue: string) => {
+    const trimmed = rawValue.trim();
+    if (nextSearchAdSchedule(adSchedule.current, trimmed).showAd && interstitialAd.ready) {
+      setPendingAdSearch(trimmed);
+    } else {
+      commitSearch(trimmed);
+    }
+  }, [interstitialAd.ready, commitSearch]);
+
+  const retrySearch = useCallback(() => {
+    setSearchRevision((revision) => revision + 1);
+  }, []);
+
+  const retryFailedMalls = useCallback(async () => {
+    const ids = [...new Set(adapterResponses.filter((response) => response.status === 'error').map((response) => response.mallId))];
+    if (!ids.length) return;
+    const generation = ++searchGeneration.current;
+    setIsLoadingProducts(true);
+    try {
+      const result = await executeUnifiedSearch(committedQuery, customProducts, customProxyUrl, ids);
+      if (generation !== searchGeneration.current) return;
+      setProducts((previous) => [...previous.filter((product) => !ids.includes(product.mallId)), ...result.products]);
+      setAdapterResponses((previous) => [...previous.filter((response) => !ids.includes(response.mallId)), ...result.adapterResponses]);
+    } catch {
+      // Keep the previous successful results and failed mall status available for another retry.
+    } finally {
+      if (generation === searchGeneration.current) setIsLoadingProducts(false);
+    }
+  }, [adapterResponses, committedQuery, customProducts, customProxyUrl]);
 
   // 최근 검색어 개별 삭제 및 전체 삭제
   const handleRemoveRecentQuery = useCallback((target: string) => {
@@ -230,6 +269,15 @@ export function App() {
       openTossExternalLink(href).catch(() => setPlatformError('상품 페이지를 열지 못했어요. 잠시 후 다시 시도해 주세요.'));
     }}>
       {platformError && <div role="alert" className="p-4 bg-amber-50 text-amber-900">{platformError}<button className="ml-3 min-h-11 underline" onClick={() => setPlatformError(null)}>닫기</button></div>}
+      {pendingAdSearch !== null && <SearchAdConfirmation
+        query={pendingAdSearch}
+        onCancel={() => setPendingAdSearch(null)}
+        onConfirm={async () => {
+          await interstitialAd.onSearch();
+          commitSearch(pendingAdSearch);
+          setPendingAdSearch(null);
+        }}
+      />}
       {/* 1. 상단 로고 및 내비게이션 */}
       {!isTossBuild && <Header
         favoriteCount={favorites.length}
@@ -269,6 +317,15 @@ export function App() {
           adapterResponses={adapterResponses}
           isLoading={isLoadingProducts}
           error={productError}
+          searchFavoritesOnly={searchFavoritesOnly}
+          favoriteCount={searchMallIds?.length ?? 0}
+          onRetry={retrySearch}
+          onRetryFailed={retryFailedMalls}
+          onSearchAll={() => setSearchFavoritesOnly(false)}
+          onGoToFavorites={() => {
+            setMallDirectoryExpanded(true);
+            window.setTimeout(() => document.getElementById('malls-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0);
+          }}
           customProducts={customProducts}
           onUpdateCustomProducts={setCustomProducts}
           customProxyUrl={customProxyUrl}
@@ -307,6 +364,7 @@ export function App() {
 
       {/* 8. 푸터 */}
       <Footer />
+      <ScrollToTop />
     </div>
   );
 }

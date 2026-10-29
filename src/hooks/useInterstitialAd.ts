@@ -6,7 +6,8 @@ const AD_GROUP_ID = import.meta.env.VITE_INTERSTITIAL_AD_GROUP_ID?.trim() || 'ai
 
 export function useInterstitialAd() {
   const [supported, setSupported] = useState(false);
-  const trigger = useRef<() => void>(() => {});
+  const [ready, setReady] = useState(false);
+  const trigger = useRef<() => Promise<void>>(async () => {});
 
   useEffect(() => {
     if (!isTossBuild || !loadFullScreenAd.isSupported() || !showFullScreenAd.isSupported()) return;
@@ -15,6 +16,7 @@ export function useInterstitialAd() {
     let phase: 'idle' | 'loading' | 'ready' | 'showing' = 'idle';
     let releaseLoad = () => {};
     let releaseShow = () => {};
+    let complete: (() => void) | undefined;
 
     const preload = () => {
       if (disposed || phase !== 'idle') return;
@@ -23,7 +25,7 @@ export function useInterstitialAd() {
       try {
         releaseLoad = loadFullScreenAd({
           options: { adGroupId: AD_GROUP_ID },
-          onEvent: (event) => { if (!disposed && event.type === 'loaded') phase = 'ready'; },
+          onEvent: (event) => { if (!disposed && event.type === 'loaded') { phase = 'ready'; setReady(true); } },
           onError: () => { if (!disposed) phase = 'idle'; },
         });
       } catch {
@@ -31,15 +33,20 @@ export function useInterstitialAd() {
       }
     };
 
-    trigger.current = () => {
+    trigger.current = async () => {
       if (disposed) return;
       if (phase === 'idle') preload();
       if (phase !== 'ready') return;
       phase = 'showing';
+      setReady(false);
       releaseShow();
+      return new Promise<void>((resolve) => {
+      complete = resolve;
       const finish = () => {
         if (disposed || phase !== 'showing') return;
         phase = 'idle';
+        complete?.();
+        complete = undefined;
         preload();
       };
       try {
@@ -53,16 +60,18 @@ export function useInterstitialAd() {
       } catch {
         finish();
       }
+      });
     };
     preload();
     return () => {
       disposed = true;
-      trigger.current = () => {};
+      trigger.current = async () => {};
+      complete?.();
       releaseLoad();
       releaseShow();
     };
   }, []);
 
   const onSearch = useCallback(() => trigger.current(), []);
-  return { supported, onSearch };
+  return { supported, ready, onSearch };
 }

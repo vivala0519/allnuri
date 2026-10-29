@@ -56,8 +56,6 @@ export interface OnnuriMall {
   isAvailable: boolean;
   /** 쇼핑몰 설명 (기존 note 보존 및 확장) */
   description: string;
-  /** 결제 및 이용 유의사항 */
-  paymentGuide: string;
   /** 주요 취급 카테고리 */
   categories: string[];
 }

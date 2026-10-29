@@ -26,7 +26,6 @@ export const ONNURI_MALLS: OnnuriMall[] = [
     integrationNote: '개인용 로컬 검색에서 디지털 온누리상품권 필터를 적용한 공개 결과 수집',
     isAvailable: true,
     description: '온누리 전용 온라인몰',
-    paymentGuide: '전통시장 통통 및 제휴 온누리 전용몰로 디지털 온누리상품권 결제 대상 상품 중심 운영',
     categories: ['농축수산물', '김치/반찬', '전통시장 특산품', '명절선물'],
   },
   {
@@ -45,7 +44,6 @@ export const ONNURI_MALLS: OnnuriMall[] = [
     integrationNote: '개인용 로컬 검색에서 디지털온누리 표시 상품 수집',
     isAvailable: true,
     description: '온누리 중심 쇼핑몰',
-    paymentGuide: '온누리상품권 전용 가맹 쇼핑몰로 쌀·정육·과일·생활용품 등 디지털 온누리 결제 지원',
     categories: ['쌀/잡곡', '한우/정육', '과일', '생활용품', '가공식품'],
   },
   {
@@ -64,7 +62,6 @@ export const ONNURI_MALLS: OnnuriMall[] = [
     integrationNote: '공개 상품 검색 연동 · 상품별 결제 가능 여부와 판매 상태 확인 필요',
     isAvailable: true,
     description: '전통시장 온라인 쇼핑몰',
-    paymentGuide: '상품별 디지털 온누리 결제 가능 여부와 판매 상태를 원본 쇼핑몰에서 확인하세요.',
     categories: ['전통시장 맛집', '지역특산물', '건어물', '건강식품'],
   },
   {
@@ -83,7 +80,6 @@ export const ONNURI_MALLS: OnnuriMall[] = [
     integrationNote: '개인용 로컬 검색에서 디지털온누리 표시 상품 수집',
     isAvailable: true,
     description: '온누리 중심 쇼핑몰',
-    paymentGuide: '인더마켓 온누리몰 내 온누리상품권 결제 가능 표시 상품 구매 가능',
     categories: ['신선식품', '가공식품', '생필품'],
   },
   {
@@ -102,7 +98,6 @@ export const ONNURI_MALLS: OnnuriMall[] = [
     integrationNote: '공개 상품 검색 연동 · 상품별 결제 가능 여부와 판매 상태 확인 필요',
     isAvailable: true,
     description: '온누리 중심 쇼핑몰',
-    paymentGuide: '상품별 디지털 온누리 결제 가능 여부와 판매 상태를 원본 쇼핑몰에서 확인하세요.',
     categories: ['농수축산물', '생활잡화', '전통식품'],
   },
   {
@@ -121,7 +116,6 @@ export const ONNURI_MALLS: OnnuriMall[] = [
     integrationNote: '개인용 로컬 검색에서 공개 API의 온누리 결제 필드가 확인된 상품 수집',
     isAvailable: true,
     description: '온누리 연계 플랫폼',
-    paymentGuide: '놀장 온라인몰 및 모바일 앱에서 디지털 온누리상품권 결제 가능',
     categories: ['전통시장 장보기', '농수산', '먹거리'],
   },
   {
@@ -140,7 +134,6 @@ export const ONNURI_MALLS: OnnuriMall[] = [
     integrationNote: '개인용 로컬 검색에서 검색 카드의 온누리 표시 상품 수집',
     isAvailable: true,
     description: '온누리 중심 쇼핑몰',
-    paymentGuide: '온누리 공식 사이트(onnuri.gift)의 온라인 사용처 링크와 결제 화면을 반드시 확인하세요.',
     categories: ['신선식품', '생활용품'],
   },
   {
@@ -159,7 +152,6 @@ export const ONNURI_MALLS: OnnuriMall[] = [
     integrationNote: '온누리상생스토어에 노출된 상품 중 온누리 표시와 판매 상태를 확인해 검색',
     isAvailable: true,
     description: '롯데ON 내 온누리 전용관',
-    paymentGuide: '주의: 롯데ON 전체 상품이 아닌 [온누리상생스토어] 전용관 태그 부착 상품만 온누리상품권 결제가 가능합니다.',
     categories: ['쌀/잡곡', '김치', '과일', '수산/건어물', '가공식품'],
   },
   {
@@ -178,7 +170,6 @@ export const ONNURI_MALLS: OnnuriMall[] = [
     integrationNote: '모바일 앱 중심 전통시장 배송 플랫폼 · 웹 고정 상품 검색 URL 미제공으로 외부 웹 검색 연결',
     isAvailable: true,
     description: '전통시장 연계 플랫폼',
-    paymentGuide: '주로 모바일 앱(시장을방으로)을 통해 인근 전통시장 주문 및 온누리 결제를 지원합니다.',
     categories: ['전통시장 근거리 배송', '신선먹거리'],
   },
   {
@@ -197,7 +188,6 @@ export const ONNURI_MALLS: OnnuriMall[] = [
     integrationNote: '개인용 로컬 검색에서 공개 API의 디지털온누리 혜택 필드로 상품 수집',
     isAvailable: true,
     description: '온누리 중심 쇼핑몰',
-    paymentGuide: '온누리찬스 입점 전통시장·소상공인 상품 디지털 온누리 결제 지원',
     categories: ['식품', '생활용품', '특산품'],
   },
   {
@@ -216,7 +206,6 @@ export const ONNURI_MALLS: OnnuriMall[] = [
     integrationNote: '온누리상품권 공식 기획전의 공개 상품 목록에서 판매 중 상품만 검색',
     isAvailable: true,
     description: '경북 농특산물 쇼핑 채널',
-    paymentGuide: '사이소 내 온누리상품권 결제 가능 표시(전통시장·소상공인 가맹) 상품을 확인 후 결제하세요.',
     categories: ['사과/과일', '한우/축산', '쌀/잡곡', '경북특산물'],
   },
   {
@@ -235,7 +224,6 @@ export const ONNURI_MALLS: OnnuriMall[] = [
     integrationNote: '온누리상품권 검색 필터와 상품별 온누리 표시를 확인해 검색',
     isAvailable: true,
     description: '11번가 내 온누리 전용관',
-    paymentGuide: '주의: 11번가 전체 상품이 아닌 [온누리마켓] 전용 플래그가 표시된 상품만 디지털 온누리상품권 결제가 가능합니다.',
     categories: ['쌀/생수', '김치/반찬', '정육/수산', '생활용품', '소형가전'],
   },
   {
@@ -254,7 +242,6 @@ export const ONNURI_MALLS: OnnuriMall[] = [
     integrationNote: '개인용 로컬 검색에서 공개 페이지의 온누리 결제 가능 필드로 상품 수집',
     isAvailable: true,
     description: '온누리 특가 중심몰',
-    paymentGuide: '온누리핫딜 특가 및 상시 상품 디지털 온누리상품권 결제 지원',
     categories: ['특가식품', '과일/정육', '생활용품'],
   },
   {
@@ -273,7 +260,6 @@ export const ONNURI_MALLS: OnnuriMall[] = [
     integrationNote: '폐쇄형 복지몰/제휴몰 여부 및 현행 온누리 사용처 유지 여부 재확인 필요 · 외부 웹 검색 연결만 제공',
     isAvailable: false,
     description: '이미지에 수록 · 현행 사용처 확인 필요',
-    paymentGuide: '주의: 기존 안내 이미지에는 수록되어 있으나 현행 공개 사용처 목록에서 재확인이 필요합니다. 결제 전 온누리 공식 사이트에서 가맹 여부를 확인하세요.',
     categories: ['확인필요'],
   },
   {
@@ -292,7 +278,6 @@ export const ONNURI_MALLS: OnnuriMall[] = [
     integrationNote: '현행 온누리 사용처 유지 여부 및 공식 도메인 재확인 필요 · 외부 웹 검색 연결만 제공',
     isAvailable: false,
     description: '이미지에 수록 · 현행 사용처 확인 필요',
-    paymentGuide: '주의: 기존 안내 이미지에는 수록되어 있으나 현행 공개 사용처 목록에서 재확인이 필요합니다. 결제 전 온누리 공식 사이트에서 가맹 여부를 확인하세요.',
     categories: ['확인필요'],
   },
   {
@@ -311,7 +296,6 @@ export const ONNURI_MALLS: OnnuriMall[] = [
     integrationNote: '공개 상품 검색 연동 · 상품별 결제 가능 여부와 판매 상태 확인 필요',
     isAvailable: true,
     description: '온누리 온라인 쇼핑몰',
-    paymentGuide: '상품별 디지털 온누리 결제 가능 여부와 판매 상태를 원본 쇼핑몰에서 확인하세요.',
     categories: ['전통시장 상품', '농수축산물', '생활용품'],
   },
   {
@@ -330,7 +314,6 @@ export const ONNURI_MALLS: OnnuriMall[] = [
     integrationNote: '전통시장관 상품 검색 연동 · 상품별 디지털 온누리 결제 여부와 판매 상태 확인 필요',
     isAvailable: true,
     description: '우체국쇼핑 온누리 전용관',
-    paymentGuide: '주의: 우체국쇼핑 전체 상품이 아닌 [온누리전통시장관] 대상 상품만 디지털 온누리상품권으로 결제할 수 있습니다.',
     categories: ['지역특산물', '쌀/잡곡', '김치', '과일', '수산물'],
   },
   {
@@ -349,7 +332,6 @@ export const ONNURI_MALLS: OnnuriMall[] = [
     integrationNote: '개인용 로컬 검색에서 온누리 상품 유형과 판매 상태가 확인된 상품 수집',
     isAvailable: true,
     description: '온누리 5일장 온라인몰',
-    paymentGuide: '온누리5일장 온라인몰 내 디지털 온누리상품권 결제 지원',
     categories: ['제철음식', '농수산', '전통장류'],
   },
   {
@@ -368,7 +350,6 @@ export const ONNURI_MALLS: OnnuriMall[] = [
     integrationNote: '공개 검색에서 온누리 팔도시장 카테고리 필터가 적용된 판매 상품 수집',
     isAvailable: true,
     description: '온누리 중심 쇼핑몰',
-    paymentGuide: '전국 팔도 전통시장 특산품 온누리상품권 결제 지원',
     categories: ['팔도특산물', '농축수산'],
   },
   {
@@ -387,7 +368,6 @@ export const ONNURI_MALLS: OnnuriMall[] = [
     integrationNote: '공개 검색 및 상품 카드 응답의 온누리 표시와 판매 상태가 확인된 상품 수집',
     isAvailable: true,
     description: '공영쇼핑 내 온누리 전용관',
-    paymentGuide: '주의: 공영홈쇼핑 전체 상품이 아닌 [온누리장터] 전용관 입점 상품만 온누리 결제가 가능합니다.',
     categories: ['김치', '한우/정육', '수산물', '지역특산품'],
   },
   {
@@ -406,7 +386,6 @@ export const ONNURI_MALLS: OnnuriMall[] = [
     integrationNote: '개인용 로컬 검색에서 온누리 아이콘 표시 상품 수집',
     isAvailable: true,
     description: '온누리 중심 쇼핑몰',
-    paymentGuide: '디지털 온누리상품권 가맹 온라인 쇼핑몰',
     categories: ['생활가전/디지털', '식품', '생활용품'],
   },
   {
@@ -425,7 +404,6 @@ export const ONNURI_MALLS: OnnuriMall[] = [
     integrationNote: '공개 상품 검색 연동 · 상품별 결제 가능 여부와 판매 상태 확인 필요',
     isAvailable: true,
     description: '온누리 제휴 쇼핑몰',
-    paymentGuide: '온누리상품권 결제 가능 가맹 상품 여부를 주문 화면에서 확인 후 결제하세요.',
     categories: ['디지털/가전', '생활용품'],
   },
   {
@@ -444,7 +422,6 @@ export const ONNURI_MALLS: OnnuriMall[] = [
     integrationNote: '공개 검색에 온누리 결제 필터를 적용하고 상품별 결제·품절 필드를 확인',
     isAvailable: true,
     description: '현대홈쇼핑 내 온누리 전용관',
-    paymentGuide: '주의: 현대Hmall 일반 백화점/홈쇼핑 상품이 아닌 [온누리샵] 전용관 상품만 온누리상품권 결제가 가능합니다.',
     categories: ['전통시장 명물', '신선식품', '건강식품'],
   },
   {
@@ -463,7 +440,6 @@ export const ONNURI_MALLS: OnnuriMall[] = [
     integrationNote: '수산시장 전문 플랫폼 · 도메인(tpirates.com) 지정 웹 검색 및 홈페이지/앱 연결 지원',
     isAvailable: true,
     description: '최근 사용처 목록에 별도 수록된 수산물 채널',
-    paymentGuide: '인어교주해적단 내 온누리상품권 결제 가능 표시 수산시장 점포 상품에 한해 결제 가능합니다.',
     categories: ['수산물', '회/대게', '제철해산물'],
   },
 ];

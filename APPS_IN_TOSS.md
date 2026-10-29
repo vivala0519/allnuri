@@ -49,7 +49,7 @@ npm run build:toss
 
 공식 API 문서: https://developers-apps-in-toss.toss.im/documentation/common/monetization/iaa/interstitial-rewarded-ad
 
-- `src/hooks/useInterstitialAd.ts`에서 광고를 미리 로드하고 명시적인 상품 검색마다 준비된 광고를 표시합니다.
+- `src/hooks/useInterstitialAd.ts`에서 광고를 미리 로드합니다. 앱 진입 후 최초 검색과 이후 다섯 번째 새로운 검색마다(1·6·11번째) 준비된 광고가 있으면 확인창을 엽니다. 직전과 같은 검색어 및 재시도는 횟수에서 제외합니다. 사용자가 확인하면 광고를 표시하고, 닫히거나 표시 실패하면 검색을 진행하며, 취소하면 검색하지 않고 횟수도 늘지 않습니다. 광고가 준비되지 않은 검색은 광고 없이 진행합니다.
 - 첫 진입, 자동 재검색, 즐겨찾기 변경에는 광고를 표시하지 않습니다. 광고 실패나 미지원 환경에서도 상품 검색은 진행됩니다.
 - 기본 ID는 공식 전면형 테스트 ID입니다. 개발·QR 테스트에는 실제 운영 ID를 사용하지 마세요.
 - 운영 배포 시 앱인토스 콘솔에서 전면형 광고 그룹을 생성한 후 빌드 환경의 `VITE_INTERSTITIAL_AD_GROUP_ID`를 해당 ID로 설정하고 다시 빌드하세요. 보상형 ID를 넣으면 보상형 광고가 표시되므로 반드시 전면형 그룹을 사용하세요.

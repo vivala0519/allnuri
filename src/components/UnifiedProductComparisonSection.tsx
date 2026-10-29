@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   AlertCircle,
-  ArrowUpDown,
   Code2,
   ExternalLink,
   PackageSearch,
@@ -16,7 +15,6 @@ import {
 } from '../types/onnuri';
 import { normalizeRawProduct, sortUnifiedProducts } from '../services/productAdapter';
 
-import { isTossBuild } from '../utils/toss';
 
 
 interface UnifiedProductComparisonSectionProps {
@@ -26,6 +24,12 @@ interface UnifiedProductComparisonSectionProps {
   adapterResponses: AdapterSearchResponse[];
   isLoading: boolean;
   error: string | null;
+  searchFavoritesOnly: boolean;
+  favoriteCount: number;
+  onRetry: () => void;
+  onRetryFailed: () => void;
+  onSearchAll: () => void;
+  onGoToFavorites: () => void;
   customProducts: UnifiedProduct[];
   onUpdateCustomProducts: (items: UnifiedProduct[]) => void;
   customProxyUrl: string;
@@ -40,6 +44,11 @@ export const UnifiedProductComparisonSection: React.FC<
   adapterResponses,
   isLoading,
   error,
+  searchFavoritesOnly,
+  favoriteCount,
+  onRetry,
+  onSearchAll,
+  onGoToFavorites,
   customProducts,
   onUpdateCustomProducts,
   customProxyUrl,
@@ -47,13 +56,19 @@ export const UnifiedProductComparisonSection: React.FC<
 }) => {
   const [visibleCount, setVisibleCount] = useState(24);
   const [sortBy, setSortBy] = useState<ProductSortOption>('relevance');
+  const [columns, setColumns] = useState<1 | 2 | 3>(1);
   const [selectedSpec, setSelectedSpec] = useState<string>('all');
-  const [showAdapterPanel, setShowAdapterPanel] = useState<boolean>(false);
+  const [showAdapterPanel] = useState<boolean>(false);
   const [jsonInput, setJsonInput] = useState<string>('');
   const [jsonError, setJsonError] = useState<string | null>(null);
   const [proxyInput, setProxyInput] = useState<string>(customProxyUrl);
 
   const activeQuery = query.trim();
+  const failedMalls = [...new Map(adapterResponses.filter((response) => response.status === 'error').map((response) => [response.mallId, response])).values()];
+  const hasConnected = adapterResponses.some((response) => response.status === 'connected');
+  const noFavorites = searchFavoritesOnly && favoriteCount === 0;
+  const noSearchableMalls = !hasConnected && failedMalls.length === 0;
+  const allFailed = failedMalls.length > 0 && !hasConnected && products.length === 0;
 
   useEffect(() => { setVisibleCount(24); setSelectedSpec('all'); }, [query]);
 
@@ -319,6 +334,15 @@ export const UnifiedProductComparisonSection: React.FC<
               <p className="text-base font-bold text-onnuri-ink">찾고 싶은 상품을 검색해 보세요</p>
               <p className="text-sm text-onnuri-soft mt-1">쇼핑몰별 상품과 가격을 모아 보여드릴게요.</p>
             </div>
+          ) : noFavorites ? (
+            <div role="status" className="rounded-[24px] bg-onnuri-cream p-6">
+              <h3 className="text-base font-bold text-onnuri-ink">즐겨찾기한 쇼핑몰이 없어요</h3>
+              <p className="mt-2 text-sm text-onnuri-soft">쇼핑몰 목록에서 하트를 눌러 추가해 주세요.</p>
+              <div className="mt-3 flex flex-wrap gap-3">
+                <button type="button" onClick={onGoToFavorites} className="min-h-11 font-semibold text-sm text-onnuri-greenDark">즐겨찾기 하러 가기</button>
+                <button type="button" onClick={onSearchAll} className="min-h-11 font-semibold text-sm text-onnuri-greenDark">전체 쇼핑몰에서 검색</button>
+              </div>
+            </div>
           ) : isLoading ? (
             <div
               role="status"
@@ -338,33 +362,66 @@ export const UnifiedProductComparisonSection: React.FC<
               <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" />
               <div className="text-xs sm:text-sm">
                 <strong className="font-semibold block mb-1">
-                  상품 API 데이터 조회 중 오류가 발생했습니다
+                  쇼핑몰 검색에 연결하지 못했어요
                 </strong>
-                <p>{error}</p>
+                <p>잠시 후 다시 시도해 주세요.</p>
+                <button type="button" onClick={onRetry} className="mt-2 min-h-11 font-bold underline underline-offset-4">다시 시도</button>
               </div>
             </div>
-          ) : products.length > 0 ? (
+          ) : allFailed ? (
+            <div role="alert" className="rounded-[24px] bg-onnuri-cream p-6">
+              <h3 className="text-base font-bold text-onnuri-ink">쇼핑몰 검색에 실패했어요</h3>
+              <p className="mt-2 text-sm text-onnuri-soft">조회한 쇼핑몰에서 결과를 가져오지 못했어요. 잠시 후 다시 시도해 주세요.</p>
+              <button type="button" onClick={onRetry} className="mt-3 min-h-11 text-sm font-semibold text-onnuri-greenDark">다시 시도</button>
+              {searchFavoritesOnly && <button type="button" onClick={onSearchAll} className="ml-4 min-h-11 text-sm font-semibold text-onnuri-greenDark">전체 쇼핑몰에서 검색</button>}
+            </div>
+          ) : (
             <>
+              {/*<div className="mb-4 rounded-2xl bg-onnuri-cream px-4 py-3 text-sm text-onnuri-soft" aria-live="polite">*/}
+              {/*  <p>{searchFavoritesOnly ? '즐겨찾기한 쇼핑몰' : '전체 쇼핑몰'} 검색 · 조회 완료 {completedMalls.size}곳{failedMalls.length > 0 && ` · 조회 실패 ${failedMalls.length}곳`}{checkedAt && ` · 조회 ${checkedAt}`}</p>*/}
+              {/*  {failedMalls.length > 0 && <>*/}
+              {/*    <details className="mt-1"><summary className="cursor-pointer min-h-11 flex items-center font-semibold text-onnuri-ink">조회 실패한 쇼핑몰 보기</summary>*/}
+              {/*      <p className="leading-relaxed">{failedMalls.map((mall) => mall.mallName).join(', ')}</p>*/}
+              {/*    </details>*/}
+              {/*    <button type="button" onClick={onRetryFailed} className="min-h-11 font-semibold text-onnuri-greenDark">실패한 쇼핑몰 다시 시도</button>*/}
+              {/*  </>}*/}
+              {/*</div>*/}
+              {products.length > 0 ? <>
+              <div className="mb-2 flex items-center gap-2" role="group" aria-label="한 줄에 표시할 상품 수">
+                <span className="w-12 shrink-0 text-sm font-semibold text-onnuri-soft">보기</span>
+                {([1, 2, 3] as const).map((count) => (
+                  <button
+                    key={count}
+                    type="button"
+                    aria-pressed={columns === count}
+                    aria-label={`한 줄에 ${count}개씩 보기`}
+                    title={`한 줄에 ${count}개씩 보기`}
+                    onClick={() => setColumns(count)}
+                    className={`min-h-11 min-w-11 grid place-items-center rounded-xl transition-colors ${columns === count ? 'bg-onnuri-green text-white' : 'bg-onnuri-cream text-onnuri-soft'}`}
+                  >
+                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                      {Array.from({ length: count }, (_, index) => {
+                        const width = (18 - (count - 1) * 2) / count;
+                        const x = 3 + index * (width + 2);
+                        return <React.Fragment key={index}>
+                          <rect x={x} y="4" width={width} height="7" rx="1" />
+                          <rect x={x} y="13" width={width} height="7" rx="1" />
+                        </React.Fragment>;
+                      })}
+                    </svg>
+                  </button>
+                ))}
+              </div>
               {/* 정렬 및 규격/용량 필터 컨트롤 바 */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-onnuri-line">
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-bold text-onnuri-ink">상품 {products.length.toLocaleString()}개</span>
-                  {availableSpecs.length > 0 && <label className="flex items-center gap-2 text-xs text-onnuri-soft">규격
-                    <select value={selectedSpec} onChange={(event) => { setSelectedSpec(event.target.value); setVisibleCount(24); }} className="rounded-lg border border-onnuri-line bg-white px-3 py-2 text-sm text-onnuri-ink">
-                      <option value="all">전체</option>
-                      {availableSpecs.map((spec) => <option key={spec} value={spec}>{spec}</option>)}
-                    </select>
-                  </label>}
-                </div>
-
+              <div className="mb-4 space-y-2 border-b border-onnuri-line pb-4">
                 {/* 정렬 선택 */}
-                <div className="flex items-center gap-1.5 self-stretch sm:self-auto overflow-x-auto">
-                  <ArrowUpDown className="w-3.5 h-3.5 text-onnuri-green" aria-hidden="true" />
-                  <span className="text-xs font-bold text-onnuri-soft mr-1">정렬:</span>
+                <div className="flex items-center gap-2">
+                  <span className="w-12 shrink-0 text-sm font-semibold text-onnuri-soft">정렬</span>
+                  <div className="flex min-w-0 items-center gap-1.5 overflow-x-auto">
                   {(
                     [
-                      { key: 'price_asc', label: '낮은 상품가순' },
-                      { key: 'price_desc', label: '높은 상품가순' },
+                      { key: 'price_asc', label: '낮은 가격순' },
+                      { key: 'price_desc', label: '높은 가격순' },
                       { key: 'relevance', label: '관련도순' },
                     ] as { key: ProductSortOption; label: string }[]
                   ).map((opt) => (
@@ -373,7 +430,7 @@ export const UnifiedProductComparisonSection: React.FC<
                       type="button"
                       onClick={() => setSortBy(opt.key)}
                       aria-pressed={sortBy === opt.key}
-                      className={`min-h-11 shrink-0 px-3 rounded-full text-[13px] font-bold transition-colors ${
+                      className={`min-h-11 shrink-0 px-3 rounded-full text-sm font-semibold transition-colors ${
                         sortBy === opt.key
                           ? 'bg-onnuri-green text-white'
                           : 'bg-onnuri-cream text-onnuri-soft hover:bg-onnuri-mint'
@@ -382,18 +439,27 @@ export const UnifiedProductComparisonSection: React.FC<
                       {opt.label}
                     </button>
                   ))}
+                  </div>
                 </div>
+                {availableSpecs.length > 0 && <label className="flex items-center gap-2 text-sm font-semibold text-onnuri-soft">
+                  <span className="w-12 shrink-0">규격</span>
+                  <select value={selectedSpec} onChange={(event) => { setSelectedSpec(event.target.value); setVisibleCount(24); }} className="min-h-11 rounded-xl border border-onnuri-line bg-white px-3 text-sm font-semibold text-onnuri-ink">
+                    <option value="all">전체</option>
+                    {availableSpecs.map((spec) => <option key={spec} value={spec}>{spec}</option>)}
+                  </select>
+                </label>}
               </div>
+              <p className="mb-3 text-sm font-semibold text-onnuri-ink">상품 {products.length.toLocaleString()}개</p>
 
               {/* 실제 수집 상품 비교 카드 그리드 */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className={`grid ${columns === 1 ? 'grid-cols-1 gap-4' : columns === 2 ? 'grid-cols-2 gap-3' : 'grid-cols-3 gap-2 sm:gap-4'}`}>
                 {sortedProducts.slice(0, visibleCount).map((item) => (
                   <article
                     key={item.id}
-                    className="product-card flex flex-row sm:flex-col border border-onnuri-line rounded-[24px] bg-white overflow-hidden hover:shadow-md transition-shadow p-3 sm:p-0 gap-4 sm:gap-0"
+                    className={`product-card min-w-0 flex border border-onnuri-line rounded-[20px] bg-white overflow-hidden hover:shadow-md transition-shadow ${columns === 1 ? 'flex-row p-3 gap-4' : 'flex-col p-2 sm:p-3 gap-2'}`}
                   >
                     {/* 상품 이미지 영역 */}
-                    <div className="relative w-28 h-28 shrink-0 rounded-2xl sm:rounded-none sm:w-full sm:h-44 bg-onnuri-cream flex items-center justify-center sm:border-b border-onnuri-line overflow-hidden">
+                    <div className={`relative shrink-0 rounded-2xl bg-onnuri-cream flex items-center justify-center overflow-hidden ${columns === 1 ? 'w-28 h-28' : 'w-full aspect-square'}`}>
                       {item.imageUrl ? (
                         <img
                           src={item.imageUrl}
@@ -407,33 +473,23 @@ export const UnifiedProductComparisonSection: React.FC<
                           <span className="text-[12px] font-semibold">상품 이미지 없음</span>
                         </div>
                       )}
-                      <div className="hidden sm:flex absolute top-2.5 left-2.5 flex-wrap gap-1.5">
-                        <span className="px-2.5 py-1 rounded-lg bg-onnuri-ink/85 text-white text-[12px] font-semibold backdrop-blur-sm">
-                          {item.mallName}
-                        </span>
-                        {item.parsedSpec && (
-                          <span className="px-2 py-1 rounded-lg bg-onnuri-green text-white text-[12px] font-semibold">
-                            규격 {item.parsedSpec}
-                          </span>
-                        )}
-                      </div>
                     </div>
 
                     {/* 상품 상세 정보 */}
-                    <div className="min-w-0 sm:p-4 flex-1 flex flex-col">
-                      <div className="sm:hidden text-[13px] font-bold text-onnuri-green mb-1">{item.mallName}{item.parsedSpec ? ` · ${item.parsedSpec}` : ''}</div>
-                      <h3 className="text-[15px] sm:text-base font-bold text-onnuri-ink line-clamp-2 leading-snug mb-2">
+                    <div className="min-w-0 flex-1 flex flex-col">
+                      <div className="text-xs font-bold text-onnuri-green mb-1 break-words">{item.mallName}{item.parsedSpec ? ` · ${item.parsedSpec}` : ''}</div>
+                      <h3 className={`${columns === 3 ? 'text-xs' : 'text-sm sm:text-base'} font-bold text-onnuri-ink line-clamp-2 leading-snug mb-2 break-words`}>
                         {item.title}
                       </h3>
 
-                      {item.eligibility === 'unknown' && (
-                        <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-xs font-bold text-amber-900">
-                          디지털 온누리 결제 가능 여부와 판매 상태를 쇼핑몰에서 확인하세요.
-                        </p>
-                      )}
+                      {/*{item.eligibility === 'unknown' && (*/}
+                      {/*  <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-xs font-bold text-amber-900">*/}
+                      {/*    디지털 온누리 결제 가능 여부와 판매 상태를 쇼핑몰에서 확인하세요.*/}
+                      {/*  </p>*/}
+                      {/*)}*/}
 
                       <div className="mt-auto pt-1">
-                        <strong className="text-xl font-bold text-onnuri-ink">{formatKRW(item.price)}</strong>
+                        <strong className={`${columns === 3 ? 'text-sm sm:text-xl' : 'text-lg sm:text-xl'} font-bold text-onnuri-ink break-words`}>{formatKRW(item.price)}</strong>
                         <p className="mt-1 text-xs text-onnuri-soft">{item.shippingFee === null ? '배송비 확인 필요' : item.shippingFee === 0 ? '무료배송' : `배송비 ${formatKRW(item.shippingFee)}`} {item.shippingFee !== null && ` · 합계 ${formatKRW(item.totalPrice)}`}</p>
                       </div>
 
@@ -441,51 +497,24 @@ export const UnifiedProductComparisonSection: React.FC<
                         href={item.productUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-3 w-full min-h-11 rounded-xl bg-onnuri-mint hover:bg-indigo-100 text-onnuri-greenDark text-sm font-bold flex items-center justify-center gap-1.5 transition-colors"
+                        aria-label={`${item.title} 쇼핑몰에서 상품 보기`}
+                        className="mt-3 w-full min-h-11 rounded-xl bg-onnuri-mint hover:bg-indigo-100 text-onnuri-greenDark text-xs sm:text-sm font-bold flex items-center justify-center gap-1 px-1 text-center transition-colors"
                       >
-                        <span>쇼핑몰에서 상품 보기</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>{columns === 1 ? '쇼핑몰에서 상품 보기' : '상품 보기'}</span>
+                        <ExternalLink className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                       </a>
                     </div>
                   </article>
                 ))}
               </div>
+              {sortedProducts.length === 0 && <p className="rounded-2xl bg-onnuri-cream p-5 text-sm text-onnuri-soft">선택한 규격의 상품이 없어요. 다른 규격을 선택해 주세요.</p>}
               {visibleCount < sortedProducts.length && <div className="mt-7 text-center"><button type="button" onClick={() => setVisibleCount((count) => count + 24)} className="rounded-xl border border-onnuri-line px-8 py-3 text-sm font-bold text-onnuri-ink hover:border-onnuri-green">상품 더 보기 ({sortedProducts.length - visibleCount}개 남음)</button></div>}
+              </> : <div role="status" className="rounded-[24px] bg-onnuri-cream p-6">
+                <h3 className="text-base font-semibold text-onnuri-ink">{noSearchableMalls ? '검색 가능한 쇼핑몰이 없어요' : `‘${activeQuery}’ 검색결과가 없어요`}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-onnuri-soft">{noSearchableMalls ? '선택한 쇼핑몰은 통합 상품 검색을 지원하지 않아요.' : failedMalls.length > 0 ? '조회에 성공한 쇼핑몰에서 상품을 찾지 못했어요. 일부 쇼핑몰은 검색에 실패했어요.' : '다른 상품명이나 검색어로 다시 검색해 보세요.'}</p>
+                {searchFavoritesOnly && <button type="button" onClick={onSearchAll} className="mt-3 min-h-11 text-sm font-semibold text-onnuri-greenDark">전체 쇼핑몰에서 검색</button>}
+              </div>}
             </>
-          ) : (
-            /* 실제 상품 API 데이터가 없을 때 가짜 상품을 생성하지 않고 투명하게 안내하는 카드 */
-            <div className="bg-onnuri-cream rounded-[24px] p-5 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <div className="flex items-start gap-3.5">
-                <div className="w-10 h-10 rounded-xl bg-onnuri-mint text-onnuri-green grid place-items-center flex-shrink-0 mt-0.5">
-                  <PackageSearch className="w-5 h-5" aria-hidden="true" />
-                </div>
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-sm sm:text-base font-semibold text-onnuri-ink">
-                      검색된 상품이 없습니다
-                    </h3>
-                    <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 text-[12px] font-bold">
-                      검색 결과 없음
-                    </span>
-                  </div>
-                  <p className="text-xs sm:text-[13px] text-[#5c6c63] leading-relaxed mt-1">
-                    {adapterResponses.some((response) => response.status === 'error')
-                      ? '쇼핑몰 검색 요청에 실패했습니다. 검색 결과 바로가기로 원본 몰을 확인하세요.'
-                      : '상품명에 검색어가 포함된 상품을 찾지 못했습니다. 브랜드명이나 별칭으로 검색되는 상품은 쇼핑몰에서 직접 확인해 보세요.'}{' '}
-                    상단 <strong>쇼핑몰에서 직접 검색하기</strong> 또는 아래 <strong>쇼핑몰 카드</strong>의 검색 버튼을 누르면{' '}
-                    <strong className="text-onnuri-green">“{activeQuery}”</strong> 실제 판매 페이지로 즉시 연결됩니다.
-                  </p>
-                </div>
-              </div>
-
-              {!isTossBuild && <button
-                type="button"
-                onClick={() => setShowAdapterPanel((prev) => !prev)}
-                className="px-4 py-2.5 rounded-xl bg-white border border-onnuri-line hover:border-onnuri-green text-xs font-semibold text-onnuri-green whitespace-nowrap self-stretch md:self-auto text-center"
-              >
-                {showAdapterPanel ? '연동 설정 닫기' : '연동 설정 열기'}
-              </button>}
-            </div>
           )}
         </div>
       </div>

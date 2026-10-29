@@ -206,11 +206,11 @@ export const MallDirectorySection: React.FC<MallDirectorySectionProps> = ({
         <span>총 <strong className="text-onnuri-green font-semibold">{visibleFilteredMalls.length}곳</strong></span>
       </div>
 
-      {/* 쇼핑몰 카드 그리드 (모바일 1열, 태블릿 2열, PC 3열) */}
+      {/* 쇼핑몰 카드 그리드 */}
       {visibleFilteredMalls.length > 0 ? (
         <div
           id="mallGrid"
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+          className="grid grid-cols-1 gap-3 sm:gap-4"
         >
           {visibleFilteredMalls.map((mall) => (
             <MallCard

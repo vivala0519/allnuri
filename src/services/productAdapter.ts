@@ -212,19 +212,7 @@ export class OfficialApiProxyAdapter implements ProductSearchAdapter {
       });
     } catch (err) {
       console.error('상품 API 호출 실패', err);
-      return ['onnuri-market-official', 'onnuri-goodday', 'inthemarket-onnuri', 'kkuk-ai-onnuri', 'onnuri-chance', 'onnuri-hotdeal'].flatMap((mallId) => {
-        const mall = ONNURI_MALLS.find((item) => item.id === mallId);
-        if (!mall) return [];
-        return [{
-          mallId: mall.id,
-          mallName: mall.name,
-          status: 'error' as const,
-          message: err instanceof Error ? err.message : '검색 API 연결 실패',
-          products: [],
-          directSearchUrl: buildMallPrimarySearchUrl(mall, query),
-          fetchedAt: now,
-        }];
-      });
+      throw new Error('쇼핑몰 검색에 연결하지 못했어요.');
     }
   }
 }

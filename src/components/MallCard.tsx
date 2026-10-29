@@ -15,15 +15,20 @@ export const MallCard: React.FC<MallCardProps> = ({ mall, isFavorite, onToggleFa
   const officialEntry = getMallOfficialEntryUrl(mall);
 
   return (
-    <article className="mall-card flex flex-col rounded-[24px] border border-onnuri-line bg-white p-5 transition-shadow hover:shadow-[0_8px_30px_rgba(25,31,40,0.05)]">
-      <div className="flex items-start gap-3">
+    <article className="mall-card min-w-0 flex flex-col rounded-[20px] border border-onnuri-line bg-white p-2 sm:p-5 transition-shadow hover:shadow-[0_8px_30px_rgba(25,31,40,0.05)]">
+      <div className="flex min-w-0 items-center gap-3">
         <MallLogo mall={mall} />
-        <div className="min-w-0 flex-1">
-          <h3 className="text-base font-semibold leading-snug tracking-tight text-onnuri-ink break-words">
-            {mall.name}
-          </h3>
-          <p className="mt-1 text-sm leading-relaxed text-onnuri-soft">{mall.description}</p>
+        <div className="min-w-0">
+          <h3 className="text-base font-semibold leading-snug tracking-tight text-onnuri-ink break-words">{mall.name}</h3>
+          <span className="mt-1 block text-xs font-medium text-onnuri-soft">
+            {mall.mallType === '전용몰' ? '온누리 전용·중심몰' : mall.mallType === '전용관' ? '종합몰 내 전용관' : '추가 확인 필요'}
+          </span>
         </div>
+      </div>
+
+      {/*<p className="mt-2 text-xs leading-relaxed text-onnuri-soft break-words">{mall.description}</p>*/}
+
+      <div className="mt-auto -mx-2 flex items-center justify-end sm:mx-0 pr-2">
         <button
           type="button"
           onClick={() => onToggleFavorite(mall.name)}
@@ -35,28 +40,19 @@ export const MallCard: React.FC<MallCardProps> = ({ mall, isFavorite, onToggleFa
         >
           <Heart className={`h-5 w-5 ${isFavorite ? 'fill-current' : ''}`} aria-hidden="true" />
         </button>
-      </div>
-
-      <div className="mt-3">
-        <span className="inline-flex rounded-lg bg-onnuri-cream px-2.5 py-1 text-xs font-medium text-onnuri-soft">
-          {mall.mallType === '전용몰' ? '온누리 전용·중심몰' : mall.mallType === '전용관' ? '종합몰 내 전용관' : '추가 확인 필요'}
-        </span>
-      </div>
-
-      {officialEntry && (
-        <div className="mt-auto pt-4">
+        {officialEntry && (
           <a
             href={officialEntry.url}
             target="_blank"
             rel="noopener noreferrer"
             aria-label={`${mall.name} ${officialEntry.label} 열기`}
-            className="inline-flex w-full min-h-11 items-center justify-center gap-2 rounded-xl bg-onnuri-cream px-4 text-sm font-semibold text-onnuri-ink transition-colors hover:bg-onnuri-mint"
+            title={officialEntry.label}
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-onnuri-ink transition-colors hover:bg-onnuri-mint"
           >
-            <span>{officialEntry.label}</span>
-            <ExternalLink className="h-4 w-4" aria-hidden="true" />
+            <ExternalLink className="h-5 w-5" aria-hidden="true" />
           </a>
-        </div>
-      )}
+        )}
+      </div>
     </article>
   );
 };
