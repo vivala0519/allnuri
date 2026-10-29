@@ -12,7 +12,9 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
     margin: 0;
     background-color: #ffffff;
-    color: #172b29;
+    color: #30231c;
+    word-break: keep-all;
+    overflow-wrap: break-word;
     font-family: Pretendard, "Noto Sans KR", -apple-system, BlinkMacSystemFont,
       "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
     -webkit-font-smoothing: antialiased;

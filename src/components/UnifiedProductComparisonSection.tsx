@@ -124,7 +124,7 @@ export const UnifiedProductComparisonSection: React.FC<
   return (
     <section
       aria-labelledby="unified-comparison-title"
-      className="py-10 sm:py-12 max-w-[1140px] mx-auto px-4 sm:px-6"
+      className="py-6 sm:py-12 max-w-[1140px] mx-auto px-5 sm:px-6"
     >
       <div className="bg-white">
         {/* 섹션 상단 헤더 */}
@@ -161,7 +161,7 @@ export const UnifiedProductComparisonSection: React.FC<
         </div>
 
         {/* 1. 직접 검색 URL 지원 쇼핑몰 원클릭 비교 바로가기 바 */}
-        <details className="mt-5 rounded-xl border border-onnuri-line bg-[#f8faf8]">
+        <details className="mt-5 rounded-xl border border-onnuri-line bg-[#fcf7f3]">
           <summary className="cursor-pointer px-4 py-3 text-sm font-bold text-[#52665a]">쇼핑몰에서 직접 검색하기 <span className="text-[#91a097] font-normal">({directSearchMalls.length}곳)</span></summary>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 p-4 pt-0">
             {directSearchMalls.map((mall) => {
@@ -185,7 +185,7 @@ export const UnifiedProductComparisonSection: React.FC<
                       <div className="text-xs font-extrabold text-onnuri-ink truncate group-hover:text-onnuri-green">
                         {mall.name}
                       </div>
-                      <div className="text-[11px] text-[#73827a] truncate">
+                      <div className="text-[12px] text-[#73827a] truncate">
                         {mall.searchLinkMethod === 'dedicated_zone_search'
                           ? '종합몰 내 온누리전용관 직접 검색'
                           : '쇼핑몰 내부 상품 직접 검색'}
@@ -227,7 +227,7 @@ export const UnifiedProductComparisonSection: React.FC<
                   <div className="flex items-center justify-between">
                     <strong className="font-extrabold text-onnuri-ink">{resp.mallName}</strong>
                     <span
-                      className={`px-2 py-0.5 rounded-md font-bold text-[11px] ${
+                      className={`px-2 py-0.5 rounded-md font-bold text-[12px] ${
                         resp.status === 'connected'
                           ? 'bg-emerald-50 text-emerald-700'
                           : resp.status === 'error'
@@ -244,7 +244,7 @@ export const UnifiedProductComparisonSection: React.FC<
                             : '직접/웹 검색 연결'}
                     </span>
                   </div>
-                  <p className="text-[#6c7b73] text-[11px] leading-relaxed">{resp.message}</p>
+                  <p className="text-[#6c7b73] text-[12px] leading-relaxed">{resp.message}</p>
                 </div>
               ))}
             </div>
@@ -293,7 +293,7 @@ export const UnifiedProductComparisonSection: React.FC<
                         setJsonInput('');
                         onUpdateCustomProducts([]);
                       }}
-                      className="text-[11px] text-rose-600 font-bold hover:underline"
+                      className="text-[12px] text-rose-600 font-bold hover:underline"
                     >
                       피드 초기화
                     </button>
@@ -371,7 +371,7 @@ export const UnifiedProductComparisonSection: React.FC<
                 </div>
 
                 {/* 정렬 선택 */}
-                <div className="flex items-center gap-1.5 self-end sm:self-auto">
+                <div className="flex items-center gap-1.5 self-stretch sm:self-auto overflow-x-auto">
                   <ArrowUpDown className="w-3.5 h-3.5 text-onnuri-green" aria-hidden="true" />
                   <span className="text-xs font-bold text-[#5d6963] mr-1">정렬:</span>
                   {(
@@ -386,7 +386,7 @@ export const UnifiedProductComparisonSection: React.FC<
                       type="button"
                       onClick={() => setSortBy(opt.key)}
                       aria-pressed={sortBy === opt.key}
-                      className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                      className={`min-h-11 shrink-0 px-3 rounded-full text-[13px] font-bold transition-colors ${
                         sortBy === opt.key
                           ? 'bg-onnuri-green text-white'
                           : 'bg-onnuri-cream text-[#5d6963] hover:bg-onnuri-mint'
@@ -403,29 +403,29 @@ export const UnifiedProductComparisonSection: React.FC<
                 {sortedProducts.slice(0, visibleCount).map((item) => (
                   <article
                     key={item.id}
-                    className="flex flex-col border border-onnuri-line rounded-card bg-white overflow-hidden hover:shadow-md transition-shadow"
+                    className="flex flex-row sm:flex-col border-b sm:border border-onnuri-line sm:rounded-card bg-white overflow-hidden sm:hover:shadow-md transition-shadow py-4 sm:py-0 gap-3 sm:gap-0"
                   >
                     {/* 상품 이미지 영역 */}
-                    <div className="relative h-44 bg-onnuri-cream flex items-center justify-center border-b border-onnuri-line overflow-hidden">
+                    <div className="relative w-24 h-24 shrink-0 rounded-xl sm:rounded-none sm:w-full sm:h-44 bg-onnuri-cream flex items-center justify-center sm:border-b border-onnuri-line overflow-hidden">
                       {item.imageUrl ? (
                         <img
                           src={item.imageUrl}
                           alt={item.title}
                           loading="lazy"
-                          className="w-full h-full object-contain bg-[#f8faf8]"
+                          className="w-full h-full object-contain bg-[#fcf7f3]"
                         />
                       ) : (
                         <div className="flex flex-col items-center text-[#87938b]">
                           <ShoppingBag className="w-8 h-8 mb-1 opacity-50" />
-                          <span className="text-[11px] font-semibold">상품 이미지 없음</span>
+                          <span className="text-[12px] font-semibold">상품 이미지 없음</span>
                         </div>
                       )}
-                      <div className="absolute top-2.5 left-2.5 flex flex-wrap gap-1.5">
-                        <span className="px-2.5 py-1 rounded-lg bg-onnuri-ink/85 text-white text-[11px] font-extrabold backdrop-blur-sm">
+                      <div className="hidden sm:flex absolute top-2.5 left-2.5 flex-wrap gap-1.5">
+                        <span className="px-2.5 py-1 rounded-lg bg-onnuri-ink/85 text-white text-[12px] font-extrabold backdrop-blur-sm">
                           {item.mallName}
                         </span>
                         {item.parsedSpec && (
-                          <span className="px-2 py-1 rounded-lg bg-onnuri-green text-white text-[11px] font-extrabold">
+                          <span className="px-2 py-1 rounded-lg bg-onnuri-green text-white text-[12px] font-extrabold">
                             규격 {item.parsedSpec}
                           </span>
                         )}
@@ -433,8 +433,9 @@ export const UnifiedProductComparisonSection: React.FC<
                     </div>
 
                     {/* 상품 상세 정보 */}
-                    <div className="p-4 flex-1 flex flex-col">
-                      <h3 className="text-sm sm:text-base font-extrabold text-onnuri-ink line-clamp-2 leading-snug mb-3">
+                    <div className="min-w-0 sm:p-4 flex-1 flex flex-col">
+                      <div className="sm:hidden text-[13px] font-bold text-onnuri-green mb-1">{item.mallName}{item.parsedSpec ? ` · ${item.parsedSpec}` : ''}</div>
+                      <h3 className="text-[15px] sm:text-base font-bold text-onnuri-ink line-clamp-2 leading-snug mb-2">
                         {item.title}
                       </h3>
 
@@ -453,9 +454,9 @@ export const UnifiedProductComparisonSection: React.FC<
                         href={item.productUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-4 w-full min-h-[42px] rounded-xl border border-onnuri-line hover:border-onnuri-green text-onnuri-green text-sm font-bold flex items-center justify-center gap-1.5 transition-colors"
+                        className="mt-3 w-full min-h-11 rounded-xl border border-onnuri-line hover:border-onnuri-green text-onnuri-green text-sm font-bold flex items-center justify-center gap-1.5 transition-colors"
                       >
-                        <span>쇼핑몰에서 상품 보기 ↗</span>
+                        <span>쇼핑몰에서 상품 보기</span>
                         <ExternalLink className="w-3.5 h-3.5" />
                       </a>
                     </div>
@@ -476,7 +477,7 @@ export const UnifiedProductComparisonSection: React.FC<
                     <h3 className="text-sm sm:text-base font-extrabold text-onnuri-ink">
                       검색된 상품이 없습니다
                     </h3>
-                    <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 text-[11px] font-bold">
+                    <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 text-[12px] font-bold">
                       검색 결과 없음
                     </span>
                   </div>

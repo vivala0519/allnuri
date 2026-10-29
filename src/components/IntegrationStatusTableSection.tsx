@@ -99,7 +99,7 @@ export const IntegrationStatusTableSection: React.FC<
                   <tr key={mall.id} className="hover:bg-onnuri-cream/40">
                     <td className="py-3 px-3.5 font-extrabold text-onnuri-ink whitespace-nowrap">
                       <div>{mall.name}</div>
-                      <div className="text-[10px] font-mono text-gray-400 font-normal">
+                      <div className="text-xs font-mono text-gray-500 font-normal">
                         {mall.id}
                       </div>
                     </td>
@@ -108,7 +108,7 @@ export const IntegrationStatusTableSection: React.FC<
                     </td>
                     <td className="py-3 px-3 whitespace-nowrap">
                       <span
-                        className={`inline-block px-2 py-0.5 rounded font-bold text-[11px] ${
+                        className={`inline-block px-2 py-0.5 rounded font-bold text-[12px] ${
                           mall.verificationStatus === 'needs_review'
                             ? 'bg-amber-100 text-amber-900'
                             : 'bg-onnuri-mint text-onnuri-greenDark'
@@ -123,7 +123,7 @@ export const IntegrationStatusTableSection: React.FC<
                     </td>
                     <td className="py-3 px-3 whitespace-nowrap">
                       <span
-                        className={`inline-block px-2 py-0.5 rounded border font-bold text-[11px] ${catInfo.badgeClass}`}
+                        className={`inline-block px-2 py-0.5 rounded border font-bold text-[12px] ${catInfo.badgeClass}`}
                       >
                         {catInfo.text}
                       </span>

@@ -100,9 +100,9 @@ export const MallDirectorySection: React.FC<MallDirectorySectionProps> = ({
                   type="button"
                   aria-pressed={active}
                   onClick={() => onCategoryFilterChange(tab.key)}
-                  className={`px-3.5 py-2 rounded-full text-xs sm:text-[13px] font-extrabold border transition-colors ${
+                  className={`min-h-11 px-3.5 py-2 rounded-full text-[13px] font-bold border transition-colors ${
                     active
-                      ? 'bg-onnuri-ink text-white border-onnuri-ink'
+                      ? 'bg-onnuri-green text-white border-onnuri-green'
                       : 'bg-white text-[#5d6963] border-[#e2e7e1] hover:border-onnuri-green'
                   }`}
                 >

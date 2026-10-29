@@ -26,7 +26,7 @@ import { initializeTossIdentity, isTossBuild, openTossExternalLink, shareTossSea
 export function App() {
   const [platformError, setPlatformError] = useState<string | null>(null);
   useEffect(() => {
-    initializeTossIdentity().catch((error) => setPlatformError(error instanceof Error ? error.message : '사용자 정보를 확인하지 못했어요.'));
+    initializeTossIdentity().catch(() => setPlatformError('사용자 정보를 확인하지 못했어요. 토스 앱에서 다시 열어 주세요.'));
   }, []);
   // URL 쿼리 파라미터에서 초기 검색어 및 카테고리 복원
   const initialParams = useMemo(

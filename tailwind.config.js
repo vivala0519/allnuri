@@ -8,14 +8,14 @@ export default {
     extend: {
       colors: {
         onnuri: {
-          ink: '#172b29',
-          soft: '#66716e',
-          green: '#18795f',
-          greenDark: '#0e604c',
-          mint: '#e2f4e9',
-          line: '#e4eae5',
-          cream: '#f7f8f5',
-          orange: '#ff7a52',
+          ink: '#30231c',
+          soft: '#776457',
+          green: '#bd4b12',
+          greenDark: '#92380e',
+          mint: '#fff0e5',
+          line: '#f0ded2',
+          cream: '#fcf7f3',
+          orange: '#bd4b12',
         }
       },
       fontFamily: {
