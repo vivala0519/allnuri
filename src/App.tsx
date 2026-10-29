@@ -18,7 +18,7 @@ import {
   MallDirectorySection,
   MethodFilter,
 } from './components/MallDirectorySection';
-import { IntegrationStatusTableSection } from './components/IntegrationStatusTableSection';
+
 import { UsageGuideSection } from './components/UsageGuideSection';
 import { Footer } from './components/Footer';
 import { initializeTossIdentity, isTossBuild, openTossExternalLink, shareTossSearch } from './utils/toss';
@@ -35,7 +35,7 @@ export function App() {
   );
   const initialQuery = initialParams.get('q')?.trim() || '';
   const initialCategory = (initialParams.get('category') as CategoryFilter) || 'all';
-  const validInitialCategory: CategoryFilter = ['all', '전용몰', '전용관', '검토'].includes(
+  const validInitialCategory: CategoryFilter = ['all', '전용몰', '전용관'].includes(
     initialCategory
   )
     ? initialCategory
@@ -278,9 +278,9 @@ export function App() {
 
         {/* 쇼핑몰별 데이터 연동 상태표 */}
         <details className="max-w-[1140px] mx-auto px-4 sm:px-6 border-t border-onnuri-line">
-          <summary className="py-5 cursor-pointer text-sm font-bold text-[#52665a]">이용 안내 및 연동 정보</summary>
+          <summary className="py-5 cursor-pointer text-sm font-bold text-[#52665a]">이용 안내</summary>
           <UsageGuideSection />
-          <IntegrationStatusTableSection malls={ONNURI_MALLS} />
+          {/*<IntegrationStatusTableSection malls={ONNURI_MALLS} />*/}
         </details>
       </main>
 

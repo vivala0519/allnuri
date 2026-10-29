@@ -15,9 +15,9 @@ import {
   UnifiedProduct,
 } from '../types/onnuri';
 import { normalizeRawProduct, sortUnifiedProducts } from '../services/productAdapter';
-import { buildMallPrimarySearchUrl } from '../utils/searchUrlBuilder';
+
 import { isTossBuild } from '../utils/toss';
-import { MallLogo } from './MallLogo';
+
 
 interface UnifiedProductComparisonSectionProps {
   query: string;
@@ -36,7 +36,6 @@ export const UnifiedProductComparisonSection: React.FC<
   UnifiedProductComparisonSectionProps
 > = ({
   query,
-  malls,
   products,
   adapterResponses,
   isLoading,
@@ -77,10 +76,7 @@ export const UnifiedProductComparisonSection: React.FC<
   }, [products, selectedSpec, sortBy, activeQuery]);
 
   // 직접 검색 URL(전용관/내부 검색)이 확인된 주요 쇼핑몰 목록
-  const directSearchMalls = useMemo(
-    () => malls.filter((m) => m.searchUrlTemplate !== null && m.isAvailable),
-    [malls]
-  );
+
 
   const handleApplyJsonFeed = () => {
     setJsonError(null);
@@ -125,15 +121,15 @@ export const UnifiedProductComparisonSection: React.FC<
   return (
     <section
       aria-labelledby="unified-comparison-title"
-      className="py-6 sm:py-12 max-w-[1140px] mx-auto px-5 sm:px-6"
+      className="product-results py-8 sm:py-12 max-w-[1140px] mx-auto px-5 sm:px-6"
     >
       <div className="bg-white">
         {/* 섹션 상단 헤더 */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-onnuri-line">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6">
           <div>
             <h2
               id="unified-comparison-title"
-              className="text-xl sm:text-2xl font-black tracking-tight text-onnuri-ink"
+              className="text-xl sm:text-2xl font-bold tracking-tight text-onnuri-ink"
             >
               {query.trim() ? (
                 <>
@@ -143,7 +139,7 @@ export const UnifiedProductComparisonSection: React.FC<
                 '상품 검색'
               )}
             </h2>
-            <p className="text-xs sm:text-sm text-[#687770] mt-1">
+            <p className="text-xs sm:text-sm text-onnuri-soft mt-1">
               여러 쇼핑몰의 상품을 비교해 보세요.
             </p>
           </div>
@@ -153,7 +149,7 @@ export const UnifiedProductComparisonSection: React.FC<
           {/*    type="button"*/}
           {/*    onClick={() => setShowAdapterPanel((prev) => !prev)}*/}
           {/*    aria-expanded={showAdapterPanel}*/}
-          {/*    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-onnuri-line bg-onnuri-cream hover:border-onnuri-green text-xs font-extrabold text-onnuri-ink transition-colors"*/}
+          {/*    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-onnuri-line bg-onnuri-cream hover:border-onnuri-green text-xs font-semibold text-onnuri-ink transition-colors"*/}
           {/*  >*/}
           {/*    <Code2 className="w-4 h-4 text-onnuri-green" aria-hidden="true" />*/}
           {/*    <span>연동 설정</span>*/}
@@ -162,48 +158,48 @@ export const UnifiedProductComparisonSection: React.FC<
         </div>
 
         {/* 1. 직접 검색 URL 지원 쇼핑몰 원클릭 비교 바로가기 바 */}
-        <details className="mt-5 rounded-xl border border-onnuri-line bg-[#fcf7f3]">
-          <summary className="cursor-pointer px-4 py-3 text-sm font-bold text-[#52665a]">쇼핑몰에서 직접 검색하기 <span className="text-[#91a097] font-normal">({directSearchMalls.length}곳)</span></summary>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 p-4 pt-0">
-            {directSearchMalls.map((mall) => {
-              const targetUrl = buildMallPrimarySearchUrl(mall, activeQuery);
-              return (
-                <a
-                  key={mall.id}
-                  href={targetUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center justify-between gap-2.5 bg-white hover:bg-onnuri-mint/40 border border-[#dfe8e1] hover:border-onnuri-green rounded-xl p-3 transition-all"
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <MallLogo mall={mall} size="small" />
-                    <div className="min-w-0">
-                      <div className="text-xs font-extrabold text-onnuri-ink truncate group-hover:text-onnuri-green">
-                        {mall.name}
-                      </div>
-                      <div className="text-[12px] text-[#73827a] truncate">
-                        {mall.searchLinkMethod === 'dedicated_zone_search'
-                          ? '종합몰 내 온누리전용관 직접 검색'
-                          : '쇼핑몰 내부 상품 직접 검색'}
-                      </div>
-                    </div>
-                  </div>
-                  <span className="inline-flex items-center gap-1 text-xs font-extrabold text-onnuri-green whitespace-nowrap">
-                    <span>검색</span>
-                    <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
-                  </span>
-                </a>
-              );
-            })}
-          </div>
-        </details>
+        {/*<details className="mt-5 rounded-xl border border-onnuri-line bg-onnuri-cream">*/}
+        {/*  <summary className="cursor-pointer px-4 py-3 text-sm font-bold text-onnuri-soft">쇼핑몰에서 직접 검색하기 <span className="text-[#91a097] font-normal">({directSearchMalls.length}곳)</span></summary>*/}
+        {/*  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 p-4 pt-0">*/}
+        {/*    {directSearchMalls.map((mall) => {*/}
+        {/*      const targetUrl = buildMallPrimarySearchUrl(mall, activeQuery);*/}
+        {/*      return (*/}
+        {/*        <a*/}
+        {/*          key={mall.id}*/}
+        {/*          href={targetUrl}*/}
+        {/*          target="_blank"*/}
+        {/*          rel="noopener noreferrer"*/}
+        {/*          className="group flex items-center justify-between gap-2.5 bg-white hover:bg-onnuri-mint/40 border border-[#dfe8e1] hover:border-onnuri-green rounded-xl p-3 transition-all"*/}
+        {/*        >*/}
+        {/*          <div className="flex items-center gap-2.5 min-w-0">*/}
+        {/*            <MallLogo mall={mall} size="small" />*/}
+        {/*            <div className="min-w-0">*/}
+        {/*              <div className="text-xs font-semibold text-onnuri-ink truncate group-hover:text-onnuri-green">*/}
+        {/*                {mall.name}*/}
+        {/*              </div>*/}
+        {/*              <div className="text-[12px] text-[#73827a] truncate">*/}
+        {/*                {mall.searchLinkMethod === 'dedicated_zone_search'*/}
+        {/*                  ? '종합몰 내 온누리전용관 직접 검색'*/}
+        {/*                  : '쇼핑몰 내부 상품 직접 검색'}*/}
+        {/*              </div>*/}
+        {/*            </div>*/}
+        {/*          </div>*/}
+        {/*          <span className="inline-flex items-center gap-1 text-xs font-semibold text-onnuri-green whitespace-nowrap">*/}
+        {/*            <span>검색</span>*/}
+        {/*            <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />*/}
+        {/*          </span>*/}
+        {/*        </a>*/}
+        {/*      );*/}
+        {/*    })}*/}
+        {/*  </div>*/}
+        {/*</details>*/}
 
         {/* API 어댑터 설정 및 검증용 데이터 피드 연결 패널 (토글) */}
         {showAdapterPanel && (
           <div className="mt-5 bg-onnuri-cream border border-onnuri-line rounded-2xl p-4 sm:p-5 space-y-4">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <h3 className="text-sm font-extrabold text-onnuri-ink flex items-center gap-1.5">
+                <h3 className="text-sm font-semibold text-onnuri-ink flex items-center gap-1.5">
                   <Code2 className="w-4 h-4 text-onnuri-green" />
                   <span>쇼핑몰 검색 어댑터(ProductSearchAdapter) 연동 상태 및 테스트</span>
                 </h3>
@@ -221,7 +217,7 @@ export const UnifiedProductComparisonSection: React.FC<
                   className="bg-white border border-onnuri-line rounded-xl p-3 text-xs flex flex-col gap-1"
                 >
                   <div className="flex items-center justify-between">
-                    <strong className="font-extrabold text-onnuri-ink">{resp.mallName}</strong>
+                    <strong className="font-semibold text-onnuri-ink">{resp.mallName}</strong>
                     <span
                       className={`px-2 py-0.5 rounded-md font-bold text-[12px] ${
                         resp.status === 'connected'
@@ -250,7 +246,7 @@ export const UnifiedProductComparisonSection: React.FC<
               <div>
                 <label
                   htmlFor="proxyUrlInput"
-                  className="block text-xs font-extrabold text-onnuri-ink mb-1.5"
+                  className="block text-xs font-semibold text-onnuri-ink mb-1.5"
                 >
                   백엔드 상품 검색 API 프록시 URL (선택)
                 </label>
@@ -278,7 +274,7 @@ export const UnifiedProductComparisonSection: React.FC<
                 <div className="flex items-center justify-between mb-1.5">
                   <label
                     htmlFor="jsonFeedInput"
-                    className="block text-xs font-extrabold text-onnuri-ink"
+                    className="block text-xs font-semibold text-onnuri-ink"
                   >
                     검증된 상품 데이터 JSON 피드 입력 ({customProducts.length}건 로드됨)
                   </label>
@@ -326,7 +322,7 @@ export const UnifiedProductComparisonSection: React.FC<
             <div className="py-12 sm:py-16 text-center rounded-2xl bg-[#f7faf8]">
               <PackageSearch className="w-8 h-8 text-[#91ac9a] mx-auto mb-3" aria-hidden="true" />
               <p className="text-base font-bold text-onnuri-ink">찾고 싶은 상품을 검색해 보세요</p>
-              <p className="text-sm text-[#728278] mt-1">쇼핑몰별 상품과 가격을 모아 보여드릴게요.</p>
+              <p className="text-sm text-onnuri-soft mt-1">쇼핑몰별 상품과 가격을 모아 보여드릴게요.</p>
             </div>
           ) : isLoading ? (
             <div
@@ -335,7 +331,7 @@ export const UnifiedProductComparisonSection: React.FC<
               className="py-12 text-center bg-onnuri-cream/50 rounded-2xl border border-dashed border-onnuri-line"
             >
               <RefreshCw className="w-7 h-7 text-onnuri-green animate-spin mx-auto mb-2.5" />
-              <p className="text-sm font-extrabold text-onnuri-ink">
+              <p className="text-sm font-semibold text-onnuri-ink">
                 쇼핑몰의 상품을 찾고 있어요...
               </p>
             </div>
@@ -346,7 +342,7 @@ export const UnifiedProductComparisonSection: React.FC<
             >
               <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" />
               <div className="text-xs sm:text-sm">
-                <strong className="font-extrabold block mb-1">
+                <strong className="font-semibold block mb-1">
                   상품 API 데이터 조회 중 오류가 발생했습니다
                 </strong>
                 <p>{error}</p>
@@ -358,7 +354,7 @@ export const UnifiedProductComparisonSection: React.FC<
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-onnuri-line">
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-bold text-onnuri-ink">상품 {products.length.toLocaleString()}개</span>
-                  {availableSpecs.length > 0 && <label className="flex items-center gap-2 text-xs text-[#64766a]">규격
+                  {availableSpecs.length > 0 && <label className="flex items-center gap-2 text-xs text-onnuri-soft">규격
                     <select value={selectedSpec} onChange={(event) => { setSelectedSpec(event.target.value); setVisibleCount(24); }} className="rounded-lg border border-onnuri-line bg-white px-3 py-2 text-sm text-onnuri-ink">
                       <option value="all">전체</option>
                       {availableSpecs.map((spec) => <option key={spec} value={spec}>{spec}</option>)}
@@ -369,7 +365,7 @@ export const UnifiedProductComparisonSection: React.FC<
                 {/* 정렬 선택 */}
                 <div className="flex items-center gap-1.5 self-stretch sm:self-auto overflow-x-auto">
                   <ArrowUpDown className="w-3.5 h-3.5 text-onnuri-green" aria-hidden="true" />
-                  <span className="text-xs font-bold text-[#5d6963] mr-1">정렬:</span>
+                  <span className="text-xs font-bold text-onnuri-soft mr-1">정렬:</span>
                   {(
                     [
                       { key: 'price_asc', label: '낮은 상품가순' },
@@ -385,7 +381,7 @@ export const UnifiedProductComparisonSection: React.FC<
                       className={`min-h-11 shrink-0 px-3 rounded-full text-[13px] font-bold transition-colors ${
                         sortBy === opt.key
                           ? 'bg-onnuri-green text-white'
-                          : 'bg-onnuri-cream text-[#5d6963] hover:bg-onnuri-mint'
+                          : 'bg-onnuri-cream text-onnuri-soft hover:bg-onnuri-mint'
                       }`}
                     >
                       {opt.label}
@@ -399,16 +395,16 @@ export const UnifiedProductComparisonSection: React.FC<
                 {sortedProducts.slice(0, visibleCount).map((item) => (
                   <article
                     key={item.id}
-                    className="flex flex-row sm:flex-col border-b sm:border border-onnuri-line sm:rounded-card bg-white overflow-hidden sm:hover:shadow-md transition-shadow py-4 sm:py-0 gap-3 sm:gap-0"
+                    className="product-card flex flex-row sm:flex-col border border-onnuri-line rounded-[24px] bg-white overflow-hidden hover:shadow-md transition-shadow p-3 sm:p-0 gap-4 sm:gap-0"
                   >
                     {/* 상품 이미지 영역 */}
-                    <div className="relative w-24 h-24 shrink-0 rounded-xl sm:rounded-none sm:w-full sm:h-44 bg-onnuri-cream flex items-center justify-center sm:border-b border-onnuri-line overflow-hidden">
+                    <div className="relative w-28 h-28 shrink-0 rounded-2xl sm:rounded-none sm:w-full sm:h-44 bg-onnuri-cream flex items-center justify-center sm:border-b border-onnuri-line overflow-hidden">
                       {item.imageUrl ? (
                         <img
                           src={item.imageUrl}
                           alt={item.title}
                           loading="lazy"
-                          className="w-full h-full object-contain bg-[#fcf7f3]"
+                          className="w-full h-full object-contain bg-onnuri-cream"
                         />
                       ) : (
                         <div className="flex flex-col items-center text-[#87938b]">
@@ -417,11 +413,11 @@ export const UnifiedProductComparisonSection: React.FC<
                         </div>
                       )}
                       <div className="hidden sm:flex absolute top-2.5 left-2.5 flex-wrap gap-1.5">
-                        <span className="px-2.5 py-1 rounded-lg bg-onnuri-ink/85 text-white text-[12px] font-extrabold backdrop-blur-sm">
+                        <span className="px-2.5 py-1 rounded-lg bg-onnuri-ink/85 text-white text-[12px] font-semibold backdrop-blur-sm">
                           {item.mallName}
                         </span>
                         {item.parsedSpec && (
-                          <span className="px-2 py-1 rounded-lg bg-onnuri-green text-white text-[12px] font-extrabold">
+                          <span className="px-2 py-1 rounded-lg bg-onnuri-green text-white text-[12px] font-semibold">
                             규격 {item.parsedSpec}
                           </span>
                         )}
@@ -442,15 +438,15 @@ export const UnifiedProductComparisonSection: React.FC<
                       )}
 
                       <div className="mt-auto pt-1">
-                        <strong className="text-xl font-black text-onnuri-ink">{formatKRW(item.price)}</strong>
-                        <p className="mt-1 text-xs text-[#718176]">{item.shippingFee === null ? '배송비 확인 필요' : item.shippingFee === 0 ? '무료배송' : `배송비 ${formatKRW(item.shippingFee)}`} {item.shippingFee !== null && ` · 합계 ${formatKRW(item.totalPrice)}`}</p>
+                        <strong className="text-xl font-bold text-onnuri-ink">{formatKRW(item.price)}</strong>
+                        <p className="mt-1 text-xs text-onnuri-soft">{item.shippingFee === null ? '배송비 확인 필요' : item.shippingFee === 0 ? '무료배송' : `배송비 ${formatKRW(item.shippingFee)}`} {item.shippingFee !== null && ` · 합계 ${formatKRW(item.totalPrice)}`}</p>
                       </div>
 
                       <a
                         href={item.productUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-3 w-full min-h-11 rounded-xl border border-onnuri-line hover:border-onnuri-green text-onnuri-green text-sm font-bold flex items-center justify-center gap-1.5 transition-colors"
+                        className="mt-3 w-full min-h-11 rounded-xl bg-onnuri-mint hover:bg-indigo-100 text-onnuri-greenDark text-sm font-bold flex items-center justify-center gap-1.5 transition-colors"
                       >
                         <span>쇼핑몰에서 상품 보기</span>
                         <ExternalLink className="w-3.5 h-3.5" />
@@ -463,14 +459,14 @@ export const UnifiedProductComparisonSection: React.FC<
             </>
           ) : (
             /* 실제 상품 API 데이터가 없을 때 가짜 상품을 생성하지 않고 투명하게 안내하는 카드 */
-            <div className="bg-onnuri-cream/70 border border-dashed border-[#c8d8cc] rounded-2xl p-5 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="bg-onnuri-cream rounded-[24px] p-5 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex items-start gap-3.5">
                 <div className="w-10 h-10 rounded-xl bg-onnuri-mint text-onnuri-green grid place-items-center flex-shrink-0 mt-0.5">
                   <PackageSearch className="w-5 h-5" aria-hidden="true" />
                 </div>
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-sm sm:text-base font-extrabold text-onnuri-ink">
+                    <h3 className="text-sm sm:text-base font-semibold text-onnuri-ink">
                       검색된 상품이 없습니다
                     </h3>
                     <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 text-[12px] font-bold">
@@ -490,7 +486,7 @@ export const UnifiedProductComparisonSection: React.FC<
               {!isTossBuild && <button
                 type="button"
                 onClick={() => setShowAdapterPanel((prev) => !prev)}
-                className="px-4 py-2.5 rounded-xl bg-white border border-onnuri-line hover:border-onnuri-green text-xs font-extrabold text-onnuri-green whitespace-nowrap self-stretch md:self-auto text-center"
+                className="px-4 py-2.5 rounded-xl bg-white border border-onnuri-line hover:border-onnuri-green text-xs font-semibold text-onnuri-green whitespace-nowrap self-stretch md:self-auto text-center"
               >
                 {showAdapterPanel ? '연동 설정 닫기' : '연동 설정 열기'}
               </button>}

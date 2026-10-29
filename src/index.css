@@ -12,7 +12,7 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
     margin: 0;
     background-color: #ffffff;
-    color: #30231c;
+    color: #191f28;
     word-break: keep-all;
     overflow-wrap: break-word;
     font-family: Pretendard, "Noto Sans KR", -apple-system, BlinkMacSystemFont,
@@ -25,7 +25,27 @@
   input:focus-visible,
   select:focus-visible,
   textarea:focus-visible {
-    outline: 3px solid #ffaf85;
+    outline: 3px solid #a5b8ff;
     outline-offset: 2px;
+  }
+}
+
+@layer base {
+  html { scroll-padding-top: 80px; }
+  button, a, input, select, summary { -webkit-tap-highlight-color: transparent; }
+  button, a { touch-action: manipulation; }
+  input, select { font: inherit; }
+  ::selection { background: #dce5ff; color: #191f28; }
+}
+
+@layer components {
+  .product-results { border-bottom: 8px solid #f7f8fa; }
+  .mall-directory { scroll-margin-top: 16px; }
+  .mall-card h3 { letter-spacing: -0.025em; }
+  .mall-card p { color: #6b7684; }
+  .product-card strong { letter-spacing: -0.035em; font-variant-numeric: tabular-nums; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
   }
 }
