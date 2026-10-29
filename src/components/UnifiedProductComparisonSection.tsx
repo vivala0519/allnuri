@@ -125,23 +125,18 @@ export const UnifiedProductComparisonSection: React.FC<
     >
       <div className="bg-white">
         {/* 섹션 상단 헤더 */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2
               id="unified-comparison-title"
               className="text-xl sm:text-2xl font-bold tracking-tight text-onnuri-ink"
             >
-              {query.trim() ? (
+              {query.trim() && (
                 <>
                   <span className="text-onnuri-green">“{query.trim()}”</span> 검색 결과
                 </>
-              ) : (
-                '상품 검색'
               )}
             </h2>
-            <p className="text-xs sm:text-sm text-onnuri-soft mt-1">
-              여러 쇼핑몰의 상품을 비교해 보세요.
-            </p>
           </div>
 
           {/*{!isTossBuild && <div className="flex items-center gap-2 self-start md:self-auto">*/}

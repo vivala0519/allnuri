@@ -16,7 +16,7 @@ export const HeroSearchSection: React.FC<HeroSearchSectionProps> = ({
 }) => {
   return (
     <section id="search-section" aria-labelledby="hero-title" className="hero-search bg-white">
-      <div className="max-w-[1140px] mx-auto px-5 sm:px-6 pt-10 pb-8 sm:pt-20 sm:pb-14">
+      <div className="max-w-[1140px] mx-auto px-5 sm:px-6 pt-10 pb-0 sm:pt-20 sm:pb-0">
         <div className="max-w-3xl mx-auto">
           <p className="inline-flex rounded-full bg-onnuri-mint px-3 py-1.5 text-xs font-semibold text-onnuri-greenDark mb-5">디지털 온누리 상품권</p>
           <h1 id="hero-title" className="text-[34px] sm:text-[52px] font-bold tracking-[-0.045em] leading-[1.25] text-onnuri-ink">

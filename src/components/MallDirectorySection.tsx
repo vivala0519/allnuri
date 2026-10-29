@@ -66,7 +66,7 @@ export const MallDirectorySection: React.FC<MallDirectorySectionProps> = ({
             온라인 쇼핑몰 모아보기
           </h2>
           <p className="text-sm text-onnuri-soft mt-2 leading-relaxed">
-            온누리상품권 결제 가능 표시 상품을 확인 후 결제하세요
+            결제 전, 온누리상품권 결제 가능 표시 상품을 확인하세요
           </p>
         </div>
 
