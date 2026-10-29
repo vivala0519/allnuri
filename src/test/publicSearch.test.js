@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseFiveDayResults, parsePublicResults, parseTraditionalResults, parseHmallResults, parseElevenstResults, parseLotteResults, searchPublicMalls } from '../../api/onnuri/publicSearch.mjs';
+import { parseFiveDayResults, parsePublicResults, parseTraditionalResults, parseHmallResults, parseElevenstResults, parseLotteResults, searchPublicMalls } from '../../server/onnuri/publicSearch.mjs';
 import { normalizeRawProduct, OfficialApiProxyAdapter } from '../services/productAdapter';
 import { matchesSearchQuery } from '../utils/searchMatch.mjs';
 import { vi } from 'vitest';

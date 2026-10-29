@@ -1,5 +1,5 @@
 import { createServer } from 'node:http';
-import { handleLocalSearch } from '../api/onnuri/localSearch.mjs';
+import { handleLocalSearch } from '../server/onnuri/localSearch.mjs';
 
 createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');

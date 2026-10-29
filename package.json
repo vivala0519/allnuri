@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "description": "디지털 온누리상품권 온라인몰 통합 검색 플랫폼 (온누리 찾기)",
+  "engines": { "node": "24.x" },
   "scripts": {
     "dev": "vite",
     "dev:api": "node scripts/feed-server.mjs",
@@ -13,6 +14,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "jsdom": "^25.0.1",
     "lucide-react": "^0.468.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
@@ -24,7 +26,6 @@
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
-    "jsdom": "^25.0.1",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
     "typescript": "~5.6.2",

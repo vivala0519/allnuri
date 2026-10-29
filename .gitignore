@@ -7,4 +7,4 @@ dist-ssr
 !.env.example
 .DS_Store
 coverage
-vercel.json
+.vercel

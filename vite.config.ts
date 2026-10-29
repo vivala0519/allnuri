@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { handleLocalSearch } from './api/onnuri/localSearch.mjs';
+import { handleLocalSearch } from './server/onnuri/localSearch.mjs';
 
 const localSearchPlugin = {
   name: 'local-onnuri-search',

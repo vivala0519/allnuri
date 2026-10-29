@@ -1,4 +1,4 @@
-import { readFeedConfig, searchPartnerFeeds } from '../../api/onnuri/feedCore.mjs';
+import { readFeedConfig, searchPartnerFeeds } from '../../server/onnuri/feedCore.mjs';
 
 export async function handler(event) {
   if (event.httpMethod !== 'GET') return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };

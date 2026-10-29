@@ -14,7 +14,9 @@ export async function searchLocalProducts(query, fetchImpl = fetch) {
 
 export async function handleLocalSearch(request, response) {
   response.setHeader('Content-Type', 'application/json; charset=utf-8');
+  response.setHeader('Cache-Control', 'no-store');
   if (request.method !== 'GET') {
+    response.setHeader('Allow', 'GET');
     response.statusCode = 405;
     response.end(JSON.stringify({ error: 'Method not allowed' }));
     return;
