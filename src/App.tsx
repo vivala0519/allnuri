@@ -22,8 +22,10 @@ import {
 import { UsageGuideSection } from './components/UsageGuideSection';
 import { Footer } from './components/Footer';
 import { initializeTossIdentity, isTossBuild, openTossExternalLink, shareTossSearch } from './utils/toss';
+import { useInterstitialAd } from './hooks/useInterstitialAd';
 
 export function App() {
+  const interstitialAd = useInterstitialAd();
   const [platformError, setPlatformError] = useState<string | null>(null);
   useEffect(() => {
     initializeTossIdentity().catch(() => setPlatformError('사용자 정보를 확인하지 못했어요. 토스 앱에서 다시 열어 주세요.'));
@@ -120,8 +122,9 @@ export function App() {
     setCommittedQuery(trimmed);
     if (trimmed) {
       setRecentQueries((prev) => addRecentQuery(trimmed, prev));
+      interstitialAd.onSearch();
     }
-  }, []);
+  }, [interstitialAd.onSearch]);
 
   // 최근 검색어 개별 삭제 및 전체 삭제
   const handleRemoveRecentQuery = useCallback((target: string) => {
@@ -241,6 +244,7 @@ export function App() {
       <main className="flex-1">
         {/* 2 & 3. 통합 상품 검색 영역 + 추천/최근 검색어 */}
         <HeroSearchSection
+          showAdNotice={interstitialAd.supported}
           searchFavoritesOnly={searchFavoritesOnly}
           onSearchFavoritesOnlyChange={setSearchFavoritesOnly}
           favoriteCount={favorites.length}

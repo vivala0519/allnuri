@@ -45,3 +45,13 @@ npm run build:toss
 운영 정책은 '각 제품을 소개·추천한 뒤 최저가 구매 플랫폼으로 이동'하는 경우를 외부 이동의 허용 가능 사례로 안내합니다. 이 앱이 해당하는지의 최종 판단은 검수에서 이루어집니다. 검색과 가격 비교가 앱 내부에서 완료된다는 점, 상품 링크가 타사 상품 확인 목적이라는 점을 제출 설명에 포함합니다.
 
 근거: [비게임 출시 가이드](https://developers-apps-in-toss.toss.im/checklist/app-nongame), [서비스 오픈 정책 2-2](https://developers-apps-in-toss.toss.im/intro/guide), [SDK 3.x](https://developers-apps-in-toss.toss.im/documentation/integration/sdk-3.x).
+# 전면형 광고
+
+공식 API 문서: https://developers-apps-in-toss.toss.im/documentation/common/monetization/iaa/interstitial-rewarded-ad
+
+- `src/hooks/useInterstitialAd.ts`에서 광고를 미리 로드하고 명시적인 상품 검색마다 준비된 광고를 표시합니다.
+- 첫 진입, 자동 재검색, 즐겨찾기 변경에는 광고를 표시하지 않습니다. 광고 실패나 미지원 환경에서도 상품 검색은 진행됩니다.
+- 기본 ID는 공식 전면형 테스트 ID입니다. 개발·QR 테스트에는 실제 운영 ID를 사용하지 마세요.
+- 운영 배포 시 앱인토스 콘솔에서 전면형 광고 그룹을 생성한 후 빌드 환경의 `VITE_INTERSTITIAL_AD_GROUP_ID`를 해당 ID로 설정하고 다시 빌드하세요. 보상형 ID를 넣으면 보상형 광고가 표시되므로 반드시 전면형 그룹을 사용하세요.
+- 실제 광고 렌더링·닫기·복귀 동작은 콘솔의 테스트 QR로 토스 앱에서 확인해야 합니다.
+

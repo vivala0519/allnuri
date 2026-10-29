@@ -2,6 +2,7 @@ import React from 'react';
 import { Clock, Search, X } from 'lucide-react';
 
 interface HeroSearchSectionProps {
+  showAdNotice: boolean;
   searchFavoritesOnly: boolean;
   onSearchFavoritesOnlyChange: (value: boolean) => void;
   favoriteCount: number;
@@ -16,6 +17,7 @@ interface HeroSearchSectionProps {
 }
 
 export const HeroSearchSection: React.FC<HeroSearchSectionProps> = ({
+  showAdNotice,
   searchFavoritesOnly, onSearchFavoritesOnlyChange, favoriteCount, onGoToFavorites,
   query, onQueryChange, onSubmitSearch, recentQueries, onRemoveRecentQuery, onClearRecentQueries,
 }) => {
@@ -34,6 +36,7 @@ export const HeroSearchSection: React.FC<HeroSearchSectionProps> = ({
             <input id="main-search" type="search" value={query} onChange={(event) => onQueryChange(event.target.value)} placeholder="어떤 상품을 찾으세요?" className="min-w-0 flex-1 h-12 px-1 bg-transparent text-base text-onnuri-ink placeholder:text-[#8b95a1] outline-none" />
             <button type="submit" className="h-12 px-5 sm:px-8 rounded-2xl bg-onnuri-green text-white font-bold hover:bg-onnuri-greenDark transition-colors">검색</button>
           </form>
+          {showAdNotice && <p className="mt-2 text-xs text-onnuri-soft">검색할 때 전면 광고가 표시될 수 있어요.</p>}
           <div className="mt-3 flex flex-wrap items-center gap-x-4">
           <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 text-sm font-medium text-onnuri-soft">
             <input type="checkbox" checked={searchFavoritesOnly} onChange={(event) => onSearchFavoritesOnlyChange(event.target.checked)} className="h-4 w-4 accent-onnuri-green" />
