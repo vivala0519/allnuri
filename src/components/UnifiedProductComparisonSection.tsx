@@ -16,6 +16,7 @@ import {
 } from '../types/onnuri';
 import { normalizeRawProduct, sortUnifiedProducts } from '../services/productAdapter';
 import { buildMallPrimarySearchUrl } from '../utils/searchUrlBuilder';
+import { isTossBuild } from '../utils/toss';
 
 interface UnifiedProductComparisonSectionProps {
   query: string;
@@ -146,7 +147,7 @@ export const UnifiedProductComparisonSection: React.FC<
             </p>
           </div>
 
-          <div className="flex items-center gap-2 self-start md:self-auto">
+          {!isTossBuild && <div className="flex items-center gap-2 self-start md:self-auto">
             <button
               type="button"
               onClick={() => setShowAdapterPanel((prev) => !prev)}
@@ -156,7 +157,7 @@ export const UnifiedProductComparisonSection: React.FC<
               <Code2 className="w-4 h-4 text-onnuri-green" aria-hidden="true" />
               <span>연동 설정</span>
             </button>
-          </div>
+          </div>}
         </div>
 
         {/* 1. 직접 검색 URL 지원 쇼핑몰 원클릭 비교 바로가기 바 */}
@@ -454,7 +455,7 @@ export const UnifiedProductComparisonSection: React.FC<
                         rel="noopener noreferrer"
                         className="mt-4 w-full min-h-[42px] rounded-xl border border-onnuri-line hover:border-onnuri-green text-onnuri-green text-sm font-bold flex items-center justify-center gap-1.5 transition-colors"
                       >
-                        <span>상품 보러가기</span>
+                        <span>쇼핑몰에서 상품 보기 ↗</span>
                         <ExternalLink className="w-3.5 h-3.5" />
                       </a>
                     </div>
@@ -489,13 +490,13 @@ export const UnifiedProductComparisonSection: React.FC<
                 </div>
               </div>
 
-              <button
+              {!isTossBuild && <button
                 type="button"
                 onClick={() => setShowAdapterPanel((prev) => !prev)}
                 className="px-4 py-2.5 rounded-xl bg-white border border-onnuri-line hover:border-onnuri-green text-xs font-extrabold text-onnuri-green whitespace-nowrap self-stretch md:self-auto text-center"
               >
                 {showAdapterPanel ? '연동 설정 닫기' : '연동 설정 열기'}
-              </button>
+              </button>}
             </div>
           )}
         </div>

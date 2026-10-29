@@ -3,6 +3,17 @@ import handler from '../../api/onnuri/products.js';
 
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
 
+it.each([
+  ['https://allnuri.apps.tossmini.com', 204],
+  ['https://allnuri.private-apps.tossmini.com', 204],
+  ['https://untrusted.example', 403],
+])('앱인토스 API 접근 출처를 제한한다: %s', async (origin, status) => {
+  const res = response();
+  await handler({ method: 'OPTIONS', headers: { origin } }, res);
+  expect(res.statusCode).toBe(status);
+  expect(res.headers['Access-Control-Allow-Origin']).toBe(status === 204 ? origin : undefined);
+});
+
 function response() {
   return { statusCode: 200, headers: {}, body: '',
     setHeader(name, value) { this.headers[name] = value; },

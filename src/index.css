@@ -4,10 +4,12 @@
 
 @layer base {
   html {
+    color-scheme: light;
     scroll-behavior: smooth;
   }
 
   body {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
     margin: 0;
     background-color: #ffffff;
     color: #172b29;

@@ -21,8 +21,13 @@ import {
 import { IntegrationStatusTableSection } from './components/IntegrationStatusTableSection';
 import { UsageGuideSection } from './components/UsageGuideSection';
 import { Footer } from './components/Footer';
+import { initializeTossIdentity, isTossBuild, openTossExternalLink, shareTossSearch } from './utils/toss';
 
 export function App() {
+  const [platformError, setPlatformError] = useState<string | null>(null);
+  useEffect(() => {
+    initializeTossIdentity().catch((error) => setPlatformError(error instanceof Error ? error.message : '사용자 정보를 확인하지 못했어요.'));
+  }, []);
   // URL 쿼리 파라미터에서 초기 검색어 및 카테고리 복원
   const initialParams = useMemo(
     () => new URLSearchParams(window.location.search),
@@ -136,6 +141,10 @@ export function App() {
   // 검색 URL 클립보드 공유
   const handleShareSearchUrl = useCallback(async (): Promise<boolean> => {
     try {
+      if (isTossBuild) {
+        await shareTossSearch(committedQuery);
+        return true;
+      }
       const shareUrl = window.location.href;
       if (navigator.clipboard && navigator.clipboard.writeText) {
         await navigator.clipboard.writeText(shareUrl);
@@ -143,9 +152,10 @@ export function App() {
       }
       return false;
     } catch {
+      if (isTossBuild) setPlatformError('공유하지 못했어요. 잠시 후 다시 시도해 주세요.');
       return false;
     }
-  }, []);
+  }, [committedQuery]);
 
   // 쇼핑몰 필터링
   const filteredMalls = useMemo(() => {
@@ -203,13 +213,21 @@ export function App() {
 
 
   return (
-    <div id="top" className="min-h-screen flex flex-col bg-white text-onnuri-ink">
+    <div id="top" className="min-h-screen flex flex-col bg-white text-onnuri-ink" onClickCapture={(event) => {
+      if (!isTossBuild || !(event.target instanceof Element)) return;
+      const link = event.target.closest('a[href]');
+      const href = link?.getAttribute('href');
+      if (!href || href.startsWith('#')) return;
+      event.preventDefault();
+      openTossExternalLink(href).catch(() => setPlatformError('상품 페이지를 열지 못했어요. 잠시 후 다시 시도해 주세요.'));
+    }}>
+      {platformError && <div role="alert" className="p-4 bg-amber-50 text-amber-900">{platformError}<button className="ml-3 min-h-11 underline" onClick={() => setPlatformError(null)}>닫기</button></div>}
       {/* 1. 상단 로고 및 내비게이션 */}
-      <Header
+      {!isTossBuild && <Header
         favoriteCount={favorites.length}
         favOnly={favOnly}
         onToggleFavOnly={() => setFavOnly((prev) => !prev)}
-      />
+      />}
 
       {/* 메인 콘텐츠 */}
       <main className="flex-1">

@@ -6,6 +6,7 @@ import {
   UnifiedProduct,
 } from '../types/onnuri';
 import { buildMallPrimarySearchUrl } from '../utils/searchUrlBuilder';
+import { isTossBuild } from '../utils/toss';
 import { matchesSearchQuery } from '../utils/searchMatch.mjs';
 
 /**
@@ -154,7 +155,10 @@ export class OfficialApiProxyAdapter implements ProductSearchAdapter {
   constructor(customEndpoint?: string) {
     const envUrl = import.meta.env.VITE_ONNURI_API_PROXY_URL;
     this.proxyEndpoint =
-      customEndpoint?.trim() || (typeof envUrl === 'string' && envUrl.trim() ? envUrl.trim() : '/api/onnuri/products');
+      customEndpoint?.trim() || (typeof envUrl === 'string' && envUrl.trim() ? envUrl.trim() : isTossBuild ? 'https://allnuri.vercel.app/api/onnuri/products' : '/api/onnuri/products');
+    if (isTossBuild && !this.proxyEndpoint?.startsWith('https://')) {
+      this.proxyEndpoint = 'https://allnuri.vercel.app/api/onnuri/products';
+    }
   }
 
   isConfigured(): boolean {

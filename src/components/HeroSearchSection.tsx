@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Check, Clock, Search, Share2, X } from 'lucide-react';
+import { isTossBuild } from '../utils/toss';
 
 interface HeroSearchSectionProps {
   query: string;
@@ -46,7 +47,7 @@ export const HeroSearchSection: React.FC<HeroSearchSectionProps> = ({
             {recentQueries.slice(0, 5).map((word) => <span key={word} className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-1"><button type="button" onClick={() => onSubmitSearch(word)}>{word}</button><button type="button" onClick={() => onRemoveRecentQuery(word)} aria-label={`${word} 최근 검색어 삭제`}><X className="w-3 h-3" /></button></span>)}
             <button type="button" onClick={onClearRecentQueries} className="underline underline-offset-2">전체 삭제</button>
           </div>}
-          <div className="mt-5 flex items-center justify-between gap-3 text-xs text-[#718176]"><span>검색 결과의 가격과 결제 가능 여부는 쇼핑몰에서 확인해 주세요.</span><button type="button" onClick={share} className="inline-flex items-center gap-1.5 whitespace-nowrap hover:text-onnuri-green">{copied ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}{copied ? '복사됨' : '검색 공유'}</button></div>
+          <div className="mt-5 flex items-center justify-between gap-3 text-xs text-[#718176]"><span>검색 결과의 가격과 결제 가능 여부는 쇼핑몰에서 확인해 주세요.</span><button type="button" onClick={share} className="inline-flex items-center gap-1.5 whitespace-nowrap hover:text-onnuri-green">{copied ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}{copied ? (isTossBuild ? '공유됨' : '복사됨') : '검색 공유'}</button></div>
         </div>
       </div>
     </section>
