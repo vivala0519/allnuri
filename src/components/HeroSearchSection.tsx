@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 
 interface HeroSearchSectionProps {
   showAdNotice: boolean;
@@ -19,7 +19,7 @@ interface HeroSearchSectionProps {
 export const HeroSearchSection: React.FC<HeroSearchSectionProps> = ({
   showAdNotice,
   searchFavoritesOnly, onSearchFavoritesOnlyChange, favoriteCount, onGoToFavorites,
-  query, onQueryChange, onSubmitSearch,
+  query, onQueryChange, onSubmitSearch, recentQueries, onRemoveRecentQuery, onClearRecentQueries,
 }) => {
   return (
     <section id="search-section" aria-labelledby="hero-title" className="hero-search bg-white">
@@ -36,6 +36,24 @@ export const HeroSearchSection: React.FC<HeroSearchSectionProps> = ({
             <input id="main-search" type="search" value={query} onChange={(event) => onQueryChange(event.target.value)} placeholder="어떤 상품을 찾으세요?" className="min-w-0 flex-1 h-12 px-1 bg-transparent text-base text-onnuri-ink placeholder:text-[#8b95a1] outline-none" />
             <button type="submit" className="h-12 px-5 sm:px-8 rounded-2xl bg-onnuri-green text-white font-bold hover:bg-onnuri-greenDark transition-colors">검색</button>
           </form>
+          {recentQueries.length > 0 && (
+            <div className="mt-4" aria-label="최근 검색어">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm font-semibold text-onnuri-ink">최근 검색</span>
+                <button type="button" onClick={onClearRecentQueries} className="min-h-11 px-2 text-xs font-medium text-onnuri-soft">전체 삭제</button>
+              </div>
+              <div className="flex gap-2 overflow-x-auto pb-1" aria-label="최근 검색어 목록">
+                {recentQueries.map((word) => (
+                  <div key={word} className="flex shrink-0 items-center rounded-full bg-onnuri-cream">
+                    <button type="button" onClick={() => onSubmitSearch(word)} className="min-h-11 max-w-[160px] truncate pl-4 pr-1 text-sm font-medium text-onnuri-ink" title={word}>{word}</button>
+                    <button type="button" onClick={() => onRemoveRecentQuery(word)} aria-label={`${word} 최근 검색어 삭제`} className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-onnuri-soft">
+                      <X className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           {showAdNotice && <p className="mt-2 text-xs text-onnuri-soft">검색결과 확인 전 광고 시청 여부를 선택할 수 있어요.</p>}
           <div className="mt-3 flex flex-wrap items-center gap-x-4">
           <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 text-sm font-medium text-onnuri-soft">

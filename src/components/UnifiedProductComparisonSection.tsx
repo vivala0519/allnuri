@@ -14,6 +14,8 @@ import {
   UnifiedProduct,
 } from '../types/onnuri';
 import { normalizeRawProduct, sortUnifiedProducts } from '../services/productAdapter';
+import { trackEvent } from '../utils/analytics';
+import { loadSearchSort, loadSearchView, saveSearchPreference } from '../utils/storage';
 
 
 
@@ -55,8 +57,8 @@ export const UnifiedProductComparisonSection: React.FC<
   onUpdateCustomProxyUrl,
 }) => {
   const [visibleCount, setVisibleCount] = useState(24);
-  const [sortBy, setSortBy] = useState<ProductSortOption>('relevance');
-  const [columns, setColumns] = useState<1 | 2 | 3>(1);
+  const [sortBy, setSortBy] = useState<ProductSortOption>(loadSearchSort);
+  const [columns, setColumns] = useState<1 | 2 | 3>(loadSearchView);
   const [selectedSpec, setSelectedSpec] = useState<string>('all');
   const [showAdapterPanel] = useState<boolean>(false);
   const [jsonInput, setJsonInput] = useState<string>('');
@@ -343,7 +345,7 @@ export const UnifiedProductComparisonSection: React.FC<
                 <button type="button" onClick={onSearchAll} className="min-h-11 font-semibold text-sm text-onnuri-greenDark">전체 쇼핑몰에서 검색</button>
               </div>
             </div>
-          ) : isLoading ? (
+          ) : isLoading && products.length === 0 ? (
             <div
               role="status"
               aria-live="polite"
@@ -377,6 +379,7 @@ export const UnifiedProductComparisonSection: React.FC<
             </div>
           ) : (
             <>
+              {isLoading && <p role="status" className="mb-4 text-sm text-onnuri-soft">다른 쇼핑몰의 상품도 찾고 있어요. 결과가 계속 추가됩니다.</p>}
               {/*<div className="mb-4 rounded-2xl bg-onnuri-cream px-4 py-3 text-sm text-onnuri-soft" aria-live="polite">*/}
               {/*  <p>{searchFavoritesOnly ? '즐겨찾기한 쇼핑몰' : '전체 쇼핑몰'} 검색 · 조회 완료 {completedMalls.size}곳{failedMalls.length > 0 && ` · 조회 실패 ${failedMalls.length}곳`}{checkedAt && ` · 조회 ${checkedAt}`}</p>*/}
               {/*  {failedMalls.length > 0 && <>*/}
@@ -396,7 +399,7 @@ export const UnifiedProductComparisonSection: React.FC<
                     aria-pressed={columns === count}
                     aria-label={`한 줄에 ${count}개씩 보기`}
                     title={`한 줄에 ${count}개씩 보기`}
-                    onClick={() => setColumns(count)}
+                    onClick={() => { setColumns(count); saveSearchPreference('view', String(count)); }}
                     className={`min-h-11 min-w-11 grid place-items-center rounded-xl transition-colors ${columns === count ? 'bg-onnuri-green text-white' : 'bg-onnuri-cream text-onnuri-soft'}`}
                   >
                     <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
@@ -428,7 +431,7 @@ export const UnifiedProductComparisonSection: React.FC<
                     <button
                       key={opt.key}
                       type="button"
-                      onClick={() => setSortBy(opt.key)}
+                      onClick={() => { setSortBy(opt.key); saveSearchPreference('sort', opt.key); }}
                       aria-pressed={sortBy === opt.key}
                       className={`min-h-11 shrink-0 px-3 rounded-full text-sm font-semibold transition-colors ${
                         sortBy === opt.key
@@ -495,6 +498,7 @@ export const UnifiedProductComparisonSection: React.FC<
 
                       <a
                         href={item.productUrl}
+                        onClick={() => trackEvent('product_outbound_click', { mall_id: item.mallId })}
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={`${item.title} 쇼핑몰에서 상품 보기`}

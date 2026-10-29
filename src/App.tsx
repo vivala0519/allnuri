@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ONNURI_MALLS } from './data/malls';
 import { AdapterSearchResponse, UnifiedProduct } from './types/onnuri';
-import { executeUnifiedSearch } from './services/productAdapter';
+import { executeProgressiveSearch, executeUnifiedSearch } from './services/productAdapter';
 import {
   addRecentQuery,
   clearRecentQueries,
   loadFavoriteMalls,
   loadRecentQueries,
+  loadSearchFavoritesOnly,
   removeRecentQuery,
   saveFavoriteMalls,
+  saveSearchPreference,
 } from './utils/storage';
 import { Header } from './components/Header';
 import { HeroSearchSection } from './components/HeroSearchSection';
@@ -25,7 +27,9 @@ import { initializeTossIdentity, isTossBuild, openTossExternalLink, shareTossSea
 import { useInterstitialAd } from './hooks/useInterstitialAd';
 import { SearchAdConfirmation } from './components/SearchAdConfirmation';
 import { ScrollToTop } from './components/ScrollToTop';
+import { ReviewInvitation } from './components/ReviewInvitation';
 import { nextSearchAdSchedule, normalizeAdSearchQuery } from './utils/searchAdSchedule';
+import { trackEvent } from './utils/analytics';
 
 export function App() {
   const interstitialAd = useInterstitialAd();
@@ -60,7 +64,8 @@ export function App() {
   );
 
   const [favorites, setFavorites] = useState<string[]>(() => loadFavoriteMalls());
-  const [searchFavoritesOnly, setSearchFavoritesOnly] = useState(false);
+  const [searchFavoritesOnly, setSearchFavoritesOnly] = useState(loadSearchFavoritesOnly);
+  useEffect(() => { saveSearchPreference('favorites', String(searchFavoritesOnly)); }, [searchFavoritesOnly]);
   const [mallDirectoryExpanded, setMallDirectoryExpanded] = useState(true);
   const searchMallIds = useMemo(() => searchFavoritesOnly
     ? ONNURI_MALLS.filter((mall) => favorites.includes(mall.name)).map((mall) => mall.id)
@@ -102,16 +107,38 @@ export function App() {
     const generation = ++searchGeneration.current;
     setIsLoadingProducts(true);
     setProductError(null);
+    setProducts([]);
+    setAdapterResponses([]);
 
-    executeUnifiedSearch(committedQuery, customProducts, customProxyUrl, searchMallIds)
+    executeProgressiveSearch(committedQuery, customProducts, customProxyUrl, searchMallIds, (partial) => {
+      if (cancelled || generation !== searchGeneration.current) return;
+      setProducts(partial.products);
+      setAdapterResponses(partial.adapterResponses);
+    })
       .then((res) => {
         if (cancelled || generation !== searchGeneration.current) return;
+        if (committedQuery.trim()) {
+          const completed = new Set(res.adapterResponses.filter((response) => response.status === 'connected').map((response) => response.mallId));
+          const failed = new Set(res.adapterResponses.filter((response) => response.status === 'error').map((response) => response.mallId));
+          trackEvent('search_completed', {
+            search_scope: searchMallIds ? 'favorites' : 'all',
+            result_count: res.products.length,
+            successful_malls: completed.size,
+            failed_malls: failed.size,
+          });
+          if (failed.size > 0) trackEvent('search_failed', {
+            search_scope: searchMallIds ? 'favorites' : 'all',
+            failure_type: completed.size > 0 ? 'partial' : 'all',
+            failed_malls: failed.size,
+          });
+        }
         setProducts(res.products);
         setAdapterResponses(res.adapterResponses);
         setIsLoadingProducts(false);
       })
       .catch((err) => {
         if (cancelled || generation !== searchGeneration.current) return;
+        if (committedQuery.trim()) trackEvent('search_failed', { search_scope: searchMallIds ? 'favorites' : 'all', failure_type: 'connection' });
         setProductError(
           err instanceof Error ? err.message : '상품 검색 중 오류가 발생했습니다.'
         );
@@ -127,13 +154,17 @@ export function App() {
   const commitSearch = useCallback((rawValue: string) => {
     const trimmed = rawValue.trim();
     adSchedule.current = nextSearchAdSchedule(adSchedule.current, trimmed).schedule;
+    setProducts([]);
+    setAdapterResponses([]);
+    setIsLoadingProducts(Boolean(trimmed));
     setQueryInput(trimmed);
     setCommittedQuery(trimmed);
     setSearchRevision((revision) => revision + 1);
     if (trimmed) {
+      trackEvent('search_submitted', { search_scope: searchMallIds ? 'favorites' : 'all' });
       setRecentQueries((prev) => addRecentQuery(trimmed, prev));
     }
-  }, []);
+  }, [searchMallIds]);
 
   const handleSubmitSearch = useCallback((rawValue: string) => {
     const trimmed = rawValue.trim();
@@ -145,12 +176,14 @@ export function App() {
   }, [interstitialAd.ready, commitSearch]);
 
   const retrySearch = useCallback(() => {
+    trackEvent('search_retried', { retry_scope: 'all' });
     setSearchRevision((revision) => revision + 1);
   }, []);
 
   const retryFailedMalls = useCallback(async () => {
     const ids = [...new Set(adapterResponses.filter((response) => response.status === 'error').map((response) => response.mallId))];
     if (!ids.length) return;
+    trackEvent('search_retried', { retry_scope: 'failed', mall_count: ids.length });
     const generation = ++searchGeneration.current;
     setIsLoadingProducts(true);
     try {
@@ -159,6 +192,7 @@ export function App() {
       setProducts((previous) => [...previous.filter((product) => !ids.includes(product.mallId)), ...result.products]);
       setAdapterResponses((previous) => [...previous.filter((response) => !ids.includes(response.mallId)), ...result.adapterResponses]);
     } catch {
+      if (generation === searchGeneration.current) trackEvent('search_failed', { failure_type: 'retry_connection', failed_malls: ids.length });
       // Keep the previous successful results and failed mall status available for another retry.
     } finally {
       if (generation === searchGeneration.current) setIsLoadingProducts(false);
@@ -176,6 +210,8 @@ export function App() {
 
   // 즐겨찾기 추가/해제 (localStorage 'onnuri-fav-v1' 동기화)
   const handleToggleFavorite = useCallback((mallName: string) => {
+    const mall = ONNURI_MALLS.find((item) => item.name === mallName);
+    if (mall) trackEvent(favorites.includes(mallName) ? 'favorite_removed' : 'favorite_added', { mall_id: mall.id });
     setFavorites((prev) => {
       const next = prev.includes(mallName)
         ? prev.filter((item) => item !== mallName)
@@ -183,7 +219,7 @@ export function App() {
       saveFavoriteMalls(next);
       return next;
     });
-  }, []);
+  }, [favorites]);
 
   // 검색 URL 클립보드 공유
   const handleShareSearchUrl = useCallback(async (): Promise<boolean> => {
@@ -273,6 +309,7 @@ export function App() {
         query={pendingAdSearch}
         onCancel={() => setPendingAdSearch(null)}
         onConfirm={async () => {
+          void executeProgressiveSearch(pendingAdSearch, customProducts, customProxyUrl, searchMallIds).catch(() => {});
           await interstitialAd.onSearch();
           commitSearch(pendingAdSearch);
           setPendingAdSearch(null);
@@ -308,6 +345,7 @@ export function App() {
           onClearRecentQueries={handleClearRecentQueries}
           onShareSearchUrl={handleShareSearchUrl}
         />
+        <ReviewInvitation />
 
         {/* 4. 통합 상품 비교 및 직접 검색 바로가기 섹션 */}
         <UnifiedProductComparisonSection

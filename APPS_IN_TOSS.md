@@ -55,3 +55,22 @@ npm run build:toss
 - 운영 배포 시 앱인토스 콘솔에서 전면형 광고 그룹을 생성한 후 빌드 환경의 `VITE_INTERSTITIAL_AD_GROUP_ID`를 해당 ID로 설정하고 다시 빌드하세요. 보상형 ID를 넣으면 보상형 광고가 표시되므로 반드시 전면형 그룹을 사용하세요.
 - 실제 광고 렌더링·닫기·복귀 동작은 콘솔의 테스트 QR로 토스 앱에서 확인해야 합니다.
 
+# 분석 이벤트와 전환 지표
+
+토스 앱에서만 `Analytics.log`로 다음 이벤트를 기록합니다. 검색어, 상품명, URL과 사용자 입력 원문은 기록하지 않습니다. 전송 실패는 검색이나 이동을 막지 않습니다.
+
+| 이벤트 | 의미 | 주요 파라미터 |
+| --- | --- | --- |
+| `search_submitted` | 사용자가 검색을 확정 | `search_scope` |
+| `search_completed` | 검색 응답 수신 | `search_scope`, `result_count`, `successful_malls`, `failed_malls` |
+| `search_failed` | 연결 오류 또는 일부·전체 몰 실패 | `failure_type`, `failed_malls` |
+| `search_retried` | 사용자 재시도 | `retry_scope`, `mall_count` |
+| `product_outbound_click` | 검색 결과에서 상품 링크 선택 | `mall_id` |
+| `favorite_added`, `favorite_removed` | 쇼핑몰 즐겨찾기 변경 | `mall_id` |
+
+대표 전환 지표 후보: `product_outbound_click` (이벤트 로그, 상품 페이지 이동 선택). 이것은 외부 쇼핑몰 결제 완료를 의미하지 않습니다. 보조 전환 후보는 `search_submitted`와 `favorite_added`입니다.
+
+실제 출시된 앱에서 이벤트가 수집된 후 앱인토스 콘솔 > 올누리 > 핵심 지표에서 이벤트 로그로 등록하세요. 새 커스텀 이벤트는 먼저 수집되어야 지표로 의미가 있습니다. 이벤트 로그는 콘솔 > 분석 > 이벤트에서 확인하며, QR·샌드박스 데이터는 실제 분석에 수집되지 않고 출시 다음 날부터 집계됩니다. 기존 지표가 있다면 대표 지표 변경 전 현재 설정을 확인하세요.
+
+공식 문서: https://developers-apps-in-toss.toss.im/guide/analytics/logging , https://developers-apps-in-toss.toss.im/guide/analytics/conversion-metrics
+

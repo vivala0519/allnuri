@@ -259,3 +259,65 @@ export async function executeUnifiedSearch(
     adapterResponses: allResponses,
   };
 }
+
+type SearchResult = { products: UnifiedProduct[]; adapterResponses: AdapterSearchResponse[] };
+const batchCache = new Map<string, { at: number; result: SearchResult }>();
+const inFlightBatches = new Map<string, Promise<SearchResult>>();
+const CACHE_DURATION = 60_000;
+const MAX_CACHED_BATCHES = 120;
+
+function getSearchBatch(query: string, proxyUrl: string | undefined, ids: string[]): Promise<SearchResult> {
+  const key = JSON.stringify([proxyUrl?.trim() || '', query.trim(), [...ids].sort()]);
+  const cached = batchCache.get(key);
+  if (cached && Date.now() - cached.at < CACHE_DURATION) return Promise.resolve(cached.result);
+  if (cached) batchCache.delete(key);
+  const active = inFlightBatches.get(key);
+  if (active) return active;
+  const promise = executeUnifiedSearch(query, [], proxyUrl, ids).then((result) => {
+    if (result.adapterResponses.every((response) => response.status !== 'error')) {
+      batchCache.set(key, { at: Date.now(), result });
+      if (batchCache.size > MAX_CACHED_BATCHES) batchCache.delete(batchCache.keys().next().value!);
+    }
+    return result;
+  }).finally(() => inFlightBatches.delete(key));
+  inFlightBatches.set(key, promise);
+  return promise;
+}
+
+export async function executeProgressiveSearch(
+  query: string,
+  customItems: UnifiedProduct[] = [],
+  customProxyUrl?: string,
+  mallIds?: string[],
+  onProgress?: (result: SearchResult, completed: number, total: number) => void,
+): Promise<SearchResult> {
+  const trimmed = query.trim();
+  if (!trimmed) return executeUnifiedSearch(query, customItems, customProxyUrl, mallIds);
+  const ids = (mallIds ?? ONNURI_MALLS.map((mall) => mall.id)).slice();
+  const custom = customItems.filter((item) => matchesSearchQuery(item.title, trimmed) && ids.includes(item.mallId));
+  const batches: string[][] = [];
+  for (let index = 0; index < ids.length; index += 4) batches.push(ids.slice(index, index + 4));
+  const results: SearchResult[] = [];
+  let completed = 0;
+  let connectionFailures = 0;
+  const snapshot = (): SearchResult => ({
+    products: [...results.flatMap((result) => result.products), ...custom],
+    adapterResponses: results.flatMap((result) => result.adapterResponses),
+  });
+  await Promise.all(batches.map(async (batch) => {
+    try {
+      results.push(await getSearchBatch(trimmed, customProxyUrl, batch));
+    } catch {
+      connectionFailures++;
+      const now = new Date().toISOString();
+      results.push({ products: [], adapterResponses: batch.flatMap((id) => {
+        const mall = ONNURI_MALLS.find((item) => item.id === id);
+        return mall ? [{ mallId: id, mallName: mall.name, status: 'error' as const, message: '검색에 연결하지 못했어요.', products: [], directSearchUrl: buildMallPrimarySearchUrl(mall, trimmed), fetchedAt: now }] : [];
+      }) });
+    }
+    completed++;
+    onProgress?.(snapshot(), completed, batches.length);
+  }));
+  if (batches.length > 0 && connectionFailures === batches.length) throw new Error('쇼핑몰 검색에 연결하지 못했어요.');
+  return snapshot();
+}

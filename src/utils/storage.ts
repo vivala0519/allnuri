@@ -1,6 +1,32 @@
 const FAVORITES_STORAGE_KEY = 'onnuri-fav-v1';
 const RECENT_QUERIES_STORAGE_KEY = 'onnuri-recent-queries-v1';
 const MAX_RECENT_QUERIES = 8;
+const SEARCH_VIEW_KEY = 'onnuri-search-view-v1';
+const SEARCH_SORT_KEY = 'onnuri-search-sort-v1';
+const SEARCH_FAVORITES_KEY = 'onnuri-search-favorites-v1';
+
+export function loadSearchView(): 1 | 2 | 3 {
+  try {
+    const value = localStorage.getItem(SEARCH_VIEW_KEY);
+    return value === '2' ? 2 : value === '3' ? 3 : 1;
+  } catch { return 1; }
+}
+
+export function loadSearchSort(): 'relevance' | 'price_asc' | 'price_desc' {
+  try {
+    const value = localStorage.getItem(SEARCH_SORT_KEY);
+    return value === 'price_asc' || value === 'price_desc' ? value : 'relevance';
+  } catch { return 'relevance'; }
+}
+
+export function loadSearchFavoritesOnly(): boolean {
+  try { return localStorage.getItem(SEARCH_FAVORITES_KEY) === 'true'; } catch { return false; }
+}
+
+export function saveSearchPreference(key: 'view' | 'sort' | 'favorites', value: string): void {
+  const keys = { view: SEARCH_VIEW_KEY, sort: SEARCH_SORT_KEY, favorites: SEARCH_FAVORITES_KEY };
+  try { localStorage.setItem(keys[key], value); } catch { /* Storage is optional. */ }
+}
 
 /**
  * 기존 onnuri_unified_search_demo.html과 동일한 localStorage 키('onnuri-fav-v1')를 사용하여
