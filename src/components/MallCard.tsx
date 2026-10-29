@@ -9,6 +9,7 @@ import {
   Smartphone,
 } from 'lucide-react';
 import { OnnuriMall } from '../types/onnuri';
+import { MallLogo } from './MallLogo';
 import {
   buildGoogleWebSearchUrl,
   buildMallPrimarySearchUrl,
@@ -74,13 +75,7 @@ export const MallCard: React.FC<MallCardProps> = ({
     >
       {/* 카드 상단: 로고, 쇼핑몰 이름, 즐겨찾기 */}
       <div className="flex items-start gap-3">
-        <div
-          style={{ backgroundColor: mall.color }}
-          className="w-12 h-12 rounded-[15px] text-white grid place-items-center text-[15px] font-black tracking-tight flex-shrink-0 shadow-sm"
-          aria-hidden="true"
-        >
-          {mall.code}
-        </div>
+        <MallLogo mall={mall} />
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5 flex-wrap">

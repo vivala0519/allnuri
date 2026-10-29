@@ -27,11 +27,11 @@ export const HeroSearchSection: React.FC<HeroSearchSectionProps> = ({
     <section id="search-section" aria-labelledby="hero-title" className="bg-[#fff4eb] border-b border-onnuri-line/60">
       <div className="max-w-[1140px] mx-auto px-5 sm:px-6 pt-8 pb-6 sm:pt-16 sm:pb-14">
         <div className="max-w-3xl mx-auto">
-          <p className="text-xs font-bold tracking-[0.12em] text-onnuri-green mb-3">온누리 온라인 쇼핑</p>
+          <p className="text-xs font-bold tracking-[0.12em] text-onnuri-green mb-3">디지털 온누리 상품권</p>
           <h1 id="hero-title" className="text-[32px] sm:text-5xl font-black tracking-tight leading-tight text-onnuri-ink">
-            찾는 상품을, <span className="text-onnuri-green">한 번에.</span>
+            검색을 <span className="text-onnuri-green">한 곳에서</span>
           </h1>
-          <p className="mt-3 text-[15px] sm:text-base text-[#6e5d50] leading-relaxed">여러 온누리 쇼핑몰의 상품과 가격을 한곳에서 비교해 보세요.</p>
+          <p className="mt-3 text-[15px] sm:text-base text-[#6e5d50] leading-relaxed">여러 온누리 쇼핑몰의 상품을 한곳에서 비교해 보세요.</p>
           <form onSubmit={(event) => { event.preventDefault(); onSubmitSearch(query); }} className="mt-6 flex items-center gap-2 bg-white rounded-2xl border border-[#f0d8c8] shadow-[0_8px_28px_rgba(120,60,20,0.06)] p-2">
             <Search className="w-5 h-5 text-onnuri-green ml-3 flex-shrink-0" aria-hidden="true" />
             <label htmlFor="main-search" className="sr-only">상품 검색어</label>

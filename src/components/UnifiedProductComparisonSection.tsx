@@ -17,6 +17,7 @@ import {
 import { normalizeRawProduct, sortUnifiedProducts } from '../services/productAdapter';
 import { buildMallPrimarySearchUrl } from '../utils/searchUrlBuilder';
 import { isTossBuild } from '../utils/toss';
+import { MallLogo } from './MallLogo';
 
 interface UnifiedProductComparisonSectionProps {
   query: string;
@@ -147,17 +148,17 @@ export const UnifiedProductComparisonSection: React.FC<
             </p>
           </div>
 
-          {!isTossBuild && <div className="flex items-center gap-2 self-start md:self-auto">
-            <button
-              type="button"
-              onClick={() => setShowAdapterPanel((prev) => !prev)}
-              aria-expanded={showAdapterPanel}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-onnuri-line bg-onnuri-cream hover:border-onnuri-green text-xs font-extrabold text-onnuri-ink transition-colors"
-            >
-              <Code2 className="w-4 h-4 text-onnuri-green" aria-hidden="true" />
-              <span>연동 설정</span>
-            </button>
-          </div>}
+          {/*{!isTossBuild && <div className="flex items-center gap-2 self-start md:self-auto">*/}
+          {/*  <button*/}
+          {/*    type="button"*/}
+          {/*    onClick={() => setShowAdapterPanel((prev) => !prev)}*/}
+          {/*    aria-expanded={showAdapterPanel}*/}
+          {/*    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-onnuri-line bg-onnuri-cream hover:border-onnuri-green text-xs font-extrabold text-onnuri-ink transition-colors"*/}
+          {/*  >*/}
+          {/*    <Code2 className="w-4 h-4 text-onnuri-green" aria-hidden="true" />*/}
+          {/*    <span>연동 설정</span>*/}
+          {/*  </button>*/}
+          {/*</div>}*/}
         </div>
 
         {/* 1. 직접 검색 URL 지원 쇼핑몰 원클릭 비교 바로가기 바 */}
@@ -175,12 +176,7 @@ export const UnifiedProductComparisonSection: React.FC<
                   className="group flex items-center justify-between gap-2.5 bg-white hover:bg-onnuri-mint/40 border border-[#dfe8e1] hover:border-onnuri-green rounded-xl p-3 transition-all"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <span
-                      style={{ backgroundColor: mall.color }}
-                      className="w-8 h-8 rounded-lg text-white text-xs font-black grid place-items-center flex-shrink-0"
-                    >
-                      {mall.code}
-                    </span>
+                    <MallLogo mall={mall} size="small" />
                     <div className="min-w-0">
                       <div className="text-xs font-extrabold text-onnuri-ink truncate group-hover:text-onnuri-green">
                         {mall.name}
