@@ -79,12 +79,12 @@ export const MallDirectorySection: React.FC<MallDirectorySectionProps> = ({
           <div
             role="group"
             aria-label="쇼핑몰 유형 필터"
-            className="flex flex-wrap gap-2"
+            className="flex w-full items-stretch gap-1 overflow-x-auto sm:w-auto sm:gap-2"
           >
             {(
               [
                 { key: 'all', label: `전체 ${counts.all}` },
-                { key: '전용몰', label: `온누리 전용·중심몰 ${counts.전용몰}` },
+                { key: '전용몰', label: `온누리 중심몰 ${counts.전용몰}` },
                 { key: '전용관', label: `종합몰 내 전용관 ${counts.전용관}` },
               ] as { key: CategoryFilter; label: string }[]
             ).map((tab) => {
@@ -95,7 +95,7 @@ export const MallDirectorySection: React.FC<MallDirectorySectionProps> = ({
                   type="button"
                   aria-pressed={active}
                   onClick={() => onCategoryFilterChange(tab.key)}
-                  className={`min-h-11 px-3.5 py-2 rounded-xl text-[13px] font-semibold border transition-colors ${
+                  className={`min-h-11 shrink-0 flex-1 whitespace-nowrap px-2 sm:px-3.5 py-2 rounded-xl text-xs sm:text-[13px] font-semibold border transition-colors ${
                     active
                       ? 'bg-white text-onnuri-greenDark border-white shadow-sm'
                       : 'bg-transparent text-onnuri-soft border-transparent hover:bg-white/70'
