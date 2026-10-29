@@ -67,7 +67,7 @@ export const MallDirectorySection: React.FC<MallDirectorySectionProps> = ({
             id="malls-title"
             className="text-[22px] sm:text-[28px] font-bold tracking-tight text-onnuri-ink"
           >
-            디지털 온누리 쇼핑몰 리스트
+            온누리 사용 가능 쇼핑몰
           </h2>
           <button
             type="button"
@@ -89,27 +89,37 @@ export const MallDirectorySection: React.FC<MallDirectorySectionProps> = ({
       {/* 필터 및 검색 컨트롤 영역 */}
       <div className="bg-onnuri-cream rounded-[24px] p-4 sm:p-5 mb-4 space-y-4">
         {/* 1행: 쇼핑몰 유형 탭 */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-stretch gap-1">
+            <button
+              type="button"
+              aria-pressed={!favOnly && categoryFilter === 'all'}
+              onClick={() => { onFavOnlyChange(false); onCategoryFilterChange('all'); }}
+              className={`min-h-11 flex-1 rounded-xl border px-2 py-2 text-xs font-semibold transition-colors ${!favOnly && categoryFilter === 'all' ? 'border-white bg-white text-onnuri-greenDark shadow-sm' : 'border-transparent text-onnuri-soft hover:bg-white/70'}`}
+            >전체 {counts.all}</button>
+            <button type="button" aria-pressed={favOnly} onClick={() => onFavOnlyChange(!favOnly)} className={`min-h-11 flex-1 rounded-xl border px-2 py-2 text-xs font-semibold transition-colors ${favOnly ? 'border-white bg-white text-onnuri-greenDark shadow-sm' : 'border-transparent text-onnuri-soft hover:bg-white/70'}`}>
+              즐겨찾기 {favorites.length}
+            </button>
+          </div>
           <div
             role="group"
             aria-label="쇼핑몰 유형 필터"
-            className="flex w-full items-stretch gap-1 overflow-x-auto sm:w-auto sm:gap-2"
+            className="flex w-full items-stretch gap-1 sm:gap-2"
           >
             {(
               [
-                { key: 'all', label: `전체 ${counts.all}` },
                 { key: '전용몰', label: `온누리 중심몰 ${counts.전용몰}` },
                 { key: '전용관', label: `종합몰 내 전용관 ${counts.전용관}` },
               ] as { key: CategoryFilter; label: string }[]
             ).map((tab) => {
-              const active = categoryFilter === tab.key;
+              const active = !favOnly && categoryFilter === tab.key;
               return (
                 <button
                   key={tab.key}
                   type="button"
                   aria-pressed={active}
-                  onClick={() => onCategoryFilterChange(tab.key)}
-                  className={`min-h-11 shrink-0 flex-1 whitespace-nowrap px-2 sm:px-3.5 py-2 rounded-xl text-xs sm:text-[13px] font-semibold border transition-colors ${
+                  onClick={() => { onFavOnlyChange(false); onCategoryFilterChange(tab.key); }}
+                  className={`min-h-11 min-w-0 flex-1 px-1 sm:px-3.5 py-2 rounded-xl text-xs sm:text-[13px] font-semibold border transition-colors ${
                     active
                       ? 'bg-white text-onnuri-greenDark border-white shadow-sm'
                       : 'bg-transparent text-onnuri-soft border-transparent hover:bg-white/70'
@@ -121,17 +131,6 @@ export const MallDirectorySection: React.FC<MallDirectorySectionProps> = ({
             })}
           </div>
 
-          {/* 즐겨찾기만 보기 체크박스 */}
-          <label className="inline-flex min-h-11 items-center gap-2 text-sm font-bold text-onnuri-soft cursor-pointer select-none bg-onnuri-cream px-3.5 py-2 rounded-xl border border-onnuri-line">
-            <input
-              type="checkbox"
-              id="favOnly"
-              checked={favOnly}
-              onChange={(e) => onFavOnlyChange(e.target.checked)}
-              className="w-4 h-4 accent-onnuri-green rounded"
-            />
-            <span>즐겨찾기한 쇼핑몰만 보기 ({favorites.length})</span>
-          </label>
         </div>
 
         {/* 2행: 연동 방식별 필터 + 특정 쇼핑몰 선택 + 쇼핑몰 이름 검색 */}
@@ -231,7 +230,7 @@ export const MallDirectorySection: React.FC<MallDirectorySectionProps> = ({
             조건에 맞는 쇼핑몰이 없습니다.
           </strong>
           <p className="text-xs sm:text-sm mb-4">
-            선택한 쇼핑몰 유형, 즐겨찾기 필터 또는 쇼핑몰 이름 검색어를 변경해 보세요.
+            자주가는 쇼핑몰을 즐겨찾기 해보세요.
           </p>
           <button
             type="button"

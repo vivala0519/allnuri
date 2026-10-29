@@ -244,7 +244,7 @@ export function App() {
   const filteredMalls = useMemo(() => {
     const nameTerm = mallNameQuery.trim().toLowerCase();
     const matchingMalls = ONNURI_MALLS.filter((mall) => {
-      if (categoryFilter !== 'all' && mall.mallType !== categoryFilter) {
+      if (!favOnly && categoryFilter !== 'all' && mall.mallType !== categoryFilter) {
         return false;
       }
       if (selectedMallId !== 'all' && mall.id !== selectedMallId) {

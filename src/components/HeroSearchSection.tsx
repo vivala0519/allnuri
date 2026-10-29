@@ -24,10 +24,16 @@ export const HeroSearchSection: React.FC<HeroSearchSectionProps> = ({
     <section id="search-section" aria-labelledby="hero-title" className="hero-search bg-white">
       <div className="max-w-[1140px] mx-auto px-5 sm:px-6 pt-5 pb-0 sm:pt-10 sm:pb-0">
         <div className="max-w-3xl mx-auto">
-          <p className="inline-flex rounded-full bg-onnuri-mint px-3 py-1.5 text-xs font-semibold text-onnuri-greenDark mb-5">디지털 온누리 상품권</p>
-          <h1 id="hero-title" className="text-[34px] sm:text-[52px] font-bold tracking-[-0.045em] leading-[1.25] text-onnuri-ink">
-            검색을 <span className="text-onnuri-green">한 곳에서</span>
-          </h1>
+          <p className="inline-flex rounded-full bg-onnuri-mint px-3 py-1.5 text-xs font-semibold text-onnuri-greenDark mb-2">디지털 온누리 상품권</p>
+          <div className="flex flex-wrap items-end gap-x-3 gap-y-1 justify-between">
+            <h1 id="hero-title" className="text-[34px] sm:text-[52px] font-bold tracking-[-0.045em] leading-[1.25] text-onnuri-ink">
+              검색을 <span className="text-onnuri-green">한 곳에서</span>
+            </h1>
+            <button type="button" onClick={onGoToFavorites} className="min-h-8 px-3 text-xs font-semibold text-onnuri-greenDark underline underline-offset-2">
+              <span className="block">쇼핑몰 리스트</span>
+              {/*<span className="block">확인하기</span>*/}
+            </button>
+          </div>
           <p className="mt-3 text-[15px] sm:text-base text-onnuri-soft leading-relaxed">여러 온누리 쇼핑몰의 상품을 한곳에서 비교해 보세요.</p>
           <form onSubmit={(event) => { event.preventDefault(); onSubmitSearch(query); }} className="mt-8 flex items-center gap-2 bg-onnuri-cream rounded-[22px] border border-transparent focus-within:border-onnuri-green/40 focus-within:bg-white transition-colors p-2">
             <Search className="w-5 h-5 text-onnuri-soft ml-3 flex-shrink-0" aria-hidden="true" />
@@ -54,14 +60,14 @@ export const HeroSearchSection: React.FC<HeroSearchSectionProps> = ({
             </div>
           )}
           {/*{showAdNotice && <p className="mt-2 text-xs text-onnuri-soft">검색결과 확인 전 광고 시청 여부를 선택할 수 있어요.</p>}*/}
-          <div className="mt-3 flex flex-wrap items-center gap-x-4">
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 justify-between">
           <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 text-sm font-medium text-onnuri-soft">
             <input type="checkbox" checked={searchFavoritesOnly} onChange={(event) => onSearchFavoritesOnlyChange(event.target.checked)} className="h-4 w-4 accent-onnuri-green" />
-            즐겨찾기한 쇼핑몰에서만 검색 ({favoriteCount})
+            즐겨찾기 쇼핑몰만 검색 ({favoriteCount})
           </label>
-          <button type="button" onClick={onGoToFavorites} className="min-h-11 text-sm font-semibold text-onnuri-greenDark underline underline-offset-4">즐겨찾기 하러 가기</button>
+          {favoriteCount === 0 && <button type="button" onClick={onGoToFavorites} className="min-h-11 text-xs font-semibold text-onnuri-greenDark underline underline-offset-4">즐겨찾기 하러 가기</button>}
           </div>
-          {searchFavoritesOnly && favoriteCount === 0 && <p role="status" className="text-sm text-onnuri-soft">아래 쇼핑몰 목록에서 하트를 눌러 즐겨찾기를 추가해 주세요.</p>}
+          {searchFavoritesOnly && favoriteCount === 0 && <p role="status" className="text-sm text-onnuri-soft">쇼핑몰 목록에서 하트를 눌러 즐겨찾기를 추가해 주세요.</p>}
           {/*<div className="mt-4 flex flex-wrap items-center gap-2 text-sm">*/}
           {/*  <span className="text-[#77877c] mr-1">추천</span>*/}
           {/*  {RECOMMENDED_KEYWORDS.slice(0, 5).map((word) => <button key={word} type="button" onClick={() => onSubmitSearch(word)} className="px-3 py-1.5 rounded-full bg-white border border-[#e1ebe3] text-[#53675a] hover:border-onnuri-green hover:text-onnuri-green transition-colors">{word}</button>)}*/}
