@@ -204,7 +204,6 @@ export const MallDirectorySection: React.FC<MallDirectorySectionProps> = ({
         className="flex flex-wrap items-center justify-between gap-2 text-sm text-onnuri-soft mb-3 px-1"
       >
         <span>총 <strong className="text-onnuri-green font-semibold">{visibleFilteredMalls.length}곳</strong></span>
-        <button type="button" onClick={onResetFilters} className="min-h-11 px-2 font-bold hover:text-onnuri-green">필터 초기화</button>
       </div>
 
       {/* 쇼핑몰 카드 그리드 (모바일 1열, 태블릿 2열, PC 3열) */}
@@ -240,7 +239,6 @@ export const MallDirectorySection: React.FC<MallDirectorySectionProps> = ({
             className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-onnuri-green text-white text-xs font-semibold hover:bg-onnuri-greenDark transition-colors"
           >
             <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
-            <span>필터 초기화</span>
           </button>
         </div>
       )}
